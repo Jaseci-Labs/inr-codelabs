@@ -8,6 +8,7 @@ node post {
     has image;
     has published;
     has code;
+    has summary;
 }
 
 edge posts_post {
