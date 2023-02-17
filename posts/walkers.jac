@@ -2,7 +2,6 @@ walker import_news_data {
     has file_path;
 
     can file.load_json;
-    can file.dump_json;
 
     root: take -->[0];
     app_root: take --> node::posts;
@@ -14,8 +13,6 @@ walker import_news_data {
 
         for n in news_posts{
             nd = spawn node::post(title = n["title"], description = n["description"], source = n["source"], link = n["link"], image = n["image"], published = n["published"], code = n["code"]); // creates node
-            n["id"] = nd.info['jid']; // updates id
-            file.dump_json(file_path, news_posts);  // updates json file
             here +[posts_post(id = nd.info['jid'])]+> nd;
             report nd;
         }
