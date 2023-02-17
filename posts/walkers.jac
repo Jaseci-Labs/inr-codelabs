@@ -33,9 +33,6 @@ walker create_post {
     has published;
     has code;
 
-    can file.load_json;
-    can file.dump_json;
-
     root: take -->[0];
     app_root: take --> node::posts;
 
@@ -52,19 +49,6 @@ walker create_post {
         if(image): nd.image = image;
         here +[posts_post(id = nd.info['jid'])]+> nd; // creates the edge connected to posts node
 
-        news_posts = file.load_json('./posts/news_posts.json'); //get list of news posts
-        new_post = {
-            "id": nd.info['jid'],
-            "title": nd.title,
-            "description": nd.description,
-            "source": nd.source,
-            "link": nd.link,
-            "image": nd.image,
-            "published": nd.published,
-            "code": nd.code
-        };
-        news_posts.list::append(new_post); // add new post to list of posts
-        file.dump_json('./posts/news_posts.json', news_posts);  // updates json file
         report nd;
 
         disengage;
@@ -83,9 +67,6 @@ walker update_post {
     has published;
     has code;
 
-    can file.load_json;
-    can file.dump_json;
-
     post {
 
         if(title): here.title = title;
@@ -96,22 +77,6 @@ walker update_post {
         if(published): here.published = published;
         if(code): here.code = code;
 
-        news_posts = file.load_json('./posts/news_posts.json'); //get list of news posts
-        for n in news_posts{
-            if (n["id"] == here.info['jid']){
-                n["title"] = here.title;
-                n["description"] = here.description;
-                n["source"] = here.source;
-                n["link"] = here.link;
-                n["image"] = here.image;
-                n["published"] = here.published;
-                n["code"] = here.code;
-
-                break;
-            }
-        }
-
-        file.dump_json('./posts/news_posts.json', news_posts);  // updates json file
         report here;
     }
 
@@ -119,21 +84,8 @@ walker update_post {
 
 # deletes post node; node jid must be specified in nd param
 walker delete_post {
-    can file.load_json;
-    can file.dump_json;
     post {
         report here;
-
-        news_posts = file.load_json('./posts/news_posts.json'); //get list of news posts
-        for n in news_posts{
-            if (n["id"] == here.info['jid']){
-                news_posts.list::remove(n);    //deletes post from list
-                break;
-            }
-        }
-
-        file.dump_json('./posts/news_posts.json', news_posts);  // updates json file
-
         destroy here;
         disengage;
     }
