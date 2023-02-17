@@ -1,6 +1,5 @@
 node posts;
 node post {
-    has id;
     has title;
     has description;
     has source;
