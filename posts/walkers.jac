@@ -1,27 +1,30 @@
 walker import_news_data {
     has file_path;
 
+    can file.load_json;
+    can file.dump_json;
+
     root: take -->[0];
     app_root: take --> node::posts;
     posts{
         post_nodes = --> node::post;
         for n in post_nodes: destroy n; // delete all post nodes
+
         news_posts = file.load_json(file_path); //get list of news posts
 
-        for i=0 to i<news_posts.length by i += 1: news_posts[i]["id"] = (i+1).str; // changes id
-        file.dump_json(file_path, news_posts);  // updates json file
-
         for n in news_posts{
-            nd = spawn node::post(id = n["id"].str, title = n["title"], description = n["description"], source = n["source"], link = n["link"], image = n["image"], published = n["published"], code = n["code"]); // creates node
-            here +[posts_post(id = n["id"].str)]+> nd;
+            nd = spawn node::post(title = n["title"], description = n["description"], source = n["source"], link = n["link"], image = n["image"], published = n["published"], code = n["code"]); // creates node
+            n["id"] = nd.info['jid']; // updates id
+            file.dump_json(file_path, news_posts);  // updates json file
+            here +[posts_post(id = nd.info['jid'])]+> nd;
             report nd;
         }
     }
 }
 
+# creates a post node and appends it to news_posts.json file
 walker create_post {
     
-    has id;
     has title;
     has description;
     has source;
@@ -29,6 +32,9 @@ walker create_post {
     has image;
     has published;
     has code;
+
+    can file.load_json;
+    can file.dump_json;
 
     root: take -->[0];
     app_root: take --> node::posts;
@@ -40,22 +46,25 @@ walker create_post {
             report "Missing required parameters";
             disengage;
         }
-        news_posts = file.load_json('./posts/data.json'); //get list of news posts
-        if news_posts.length > 0: next_id = news_posts[-1]["id"].int+1; else: next_id = 1; //finding the next id
+
+        nd = spawn node::post(title = title, description = description, source = source, published = published, code = code); // creates node
+        if(link): nd.link = link;
+        if(image): nd.image = image;
+        here +[posts_post(id = nd.info['jid'])]+> nd; // creates the edge connected to posts node
+
+        news_posts = file.load_json('./posts/news_posts.json'); //get list of news posts
         new_post = {
-            "id": next_id.str,
-            "title": title,
-            "description": description,
-            "source": source,
-            "link": link,
-            "image": image,
-            "published": published,
-            "code": code
+            "id": nd.info['jid'],
+            "title": nd.title,
+            "description": nd.description,
+            "source": nd.source,
+            "link": nd.link,
+            "image": nd.image,
+            "published": nd.published,
+            "code": nd.code
         };
         news_posts.list::append(new_post); // add new post to list of posts
-        file.dump_json('./posts/data.json', news_posts);  // updates json file
-        nd = spawn node::post(id = next_id.str, title = title, description = description, source = source, link = link, image = image, published = published, code = code); // creates node
-        here +[posts_post(id = next_id.str)]+> nd;
+        file.dump_json('./posts/news_posts.json', news_posts);  // updates json file
         report nd;
 
         disengage;
@@ -63,9 +72,9 @@ walker create_post {
 
 }
 
+#updates a created post; nd must be specified along with optional params in the ctx param
 walker update_post {
-    
-    has id;
+
     has title;
     has description;
     has source;
@@ -74,18 +83,11 @@ walker update_post {
     has published;
     has code;
 
-    if(!id) {
-        report:status = 400;
-        report "Missing required parameters.";
-        disengage;
-    }
-
-    root: take -->[0];
-    app_root: take --> node::posts;
-    posts: take -[posts_post(id == id.str)]-> node::post else: report:status = 404;
+    can file.load_json;
+    can file.dump_json;
 
     post {
-        
+
         if(title): here.title = title;
         if(description): here.description = description;
         if(source): here.source = source;
@@ -94,83 +96,67 @@ walker update_post {
         if(published): here.published = published;
         if(code): here.code = code;
 
-        ids = [];
-        news_posts = file.load_json('./posts/data.json'); //get list of news posts
-        for n in news_posts: ids.list::append(n["id"]); // make a list of ids
-        post_index = ids.list::index((here.id).str);  // get index/position of post in array
-        updated_post = {
-            "id": (here.id).str,
-            "title": here.title,
-            "description": here.description,
-            "source": here.source,
-            "link": here.link,
-            "image": here.image,
-            "published": here.published,
-            "code": here.code
-        };
-        news_posts[post_index] = updated_post;
-        file.dump_json('./posts/data.json', news_posts);  // updates json file
+        news_posts = file.load_json('./posts/news_posts.json'); //get list of news posts
+        for n in news_posts{
+            if (n["id"] == here.info['jid']){
+                n["title"] = here.title;
+                n["description"] = here.description;
+                n["source"] = here.source;
+                n["link"] = here.link;
+                n["image"] = here.image;
+                n["published"] = here.published;
+                n["code"] = here.code;
+
+                break;
+            }
+        }
+
+        file.dump_json('./posts/news_posts.json', news_posts);  // updates json file
         report here;
-        disengage;
     }
 
 }
 
+# deletes post node; node jid must be specified in nd param
 walker delete_post {
-    
-    has id;
-
-    if(!id) {
-        report:status = 400;
-        report "Missing required parameters.";
-        disengage;
-    }
-
-    root: take -->[0];
-    app_root: take --> node::posts;
-    posts: take -[posts_post(id == id.str)]-> node::post else: report:status = 404;
-
+    can file.load_json;
+    can file.dump_json;
     post {
-        ids = [];
-        news_posts = file.load_json('./posts/data.json'); //get list of news posts
-        for n in news_posts: ids.list::append(n["id"]); // make a list of ids
-        post_index = ids.list::index((here.id).str);  // get index/position of post in array
         report here;
-        news_posts.list::remove(news_posts[post_index]);    //deletes post from list
-        file.dump_json('./posts/data.json', news_posts);    //updates json file
+
+        news_posts = file.load_json('./posts/news_posts.json'); //get list of news posts
+        for n in news_posts{
+            if (n["id"] == here.info['jid']){
+                news_posts.list::remove(n);    //deletes post from list
+                break;
+            }
+        }
+
+        file.dump_json('./posts/news_posts.json', news_posts);  // updates json file
+
         destroy here;
         disengage;
     }
-
 }
 
+#returns post node; node jid must be specified in nd param
 walker get_post {
-    
-    has id;
-
-    if(!id) {
-        report:status = 400;
-        report "Missing required parameters.";
-        disengage;
-    }
-
-    root: take -->[0];
-    app_root: take --> node::posts;
-    posts: take -[posts_post(id == id.str)]-> node::post else: report:status = 404;
-
-    post {
+   post {
         report here;
         disengage;
     }
 
 }
 
-walker get_posts {
+walker list_posts {
+    has paginated = false;
+    has limit = 10;
+    has offset = 0;
+    
     root: take -->[0];
     app_root: take --> node::posts;
     posts{
-        post_nodes = --> node::post;
-        report post_nodes;
+        report --> node::post;
         disengage;
     }
 }
