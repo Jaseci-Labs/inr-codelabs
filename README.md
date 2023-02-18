@@ -19,6 +19,7 @@ You'll also need to install the jac_nlp module (this is needed for codelab-2)
 
 
 Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
+
 `jsserv makemigrations base`
 
 `jsserv migrate`
@@ -107,7 +108,6 @@ Send the request
 
 This walker:
 - deletes all the post nodes from the graph.
-- updates the ids in the JSON file in ascending order, starting from 1 (incase of duplicate and/or missing ids).
 - creates the posts nodes using data from the JSON file.
 
 ``` JSON
@@ -128,7 +128,7 @@ This walker:
     "name": "create_post",
     "ctx": {
       "title": "Who will benefit from our oil?",
-      "description": "&#8230;From the publishers desk In July 2019, Kaieteur News conducted an extensive review of 130 oil contracts to better understand the extent to which the Guyana-ExxonMobil deal is fraught with unfair provisions. The findings were alarming. On a daily basis, Kaieteur News will expose these alarming provisions. Today, we start with the provision that speaks ",
+      "description": "From the publishers desk In July 2019, Kaieteur News conducted an extensive review of 130 oil contracts to better understand the extent to which the Guyana-ExxonMobil deal is fraught with unfair provisions. The findings were alarming. On a daily basis, Kaieteur News will expose these alarming provisions. Today, we start with the provision that speaks ",
       "source": "Kaieteur News",
       "link": "https://www.kaieteurnewsonline.com/2020/09/14/who-will-benefit-from-our-oil/",
       "image": null,
@@ -150,7 +150,7 @@ This walker:
     "nd": "urn:uuid:db0b5d21-1dce-4337-aefd-b64bc028b39f",
     "ctx": {
       "title": "Who will benefit from our oil?",
-      "description": "&#8230;From the publishers desk In July 2019, Kaieteur News conducted an extensive review of 130 oil contracts to better understand the extent to which the Guyana-ExxonMobil deal is fraught with unfair provisions. The findings were alarming. On a daily basis, Kaieteur News will expose these alarming provisions. Today, we start with the provision that speaks ",
+      "description": "From the publishers desk In July 2019, Kaieteur News conducted an extensive review of 130 oil contracts to better understand the extent to which the Guyana-ExxonMobil deal is fraught with unfair provisions. The findings were alarming. On a daily basis, Kaieteur News will expose these alarming provisions. Today, we start with the provision that speaks ",
       "source": "Kaieteur News",
       "link": "https://www.kaieteurnewsonline.com/2020/09/14/who-will-benefit-from-our-oil/",
       "image": null,
