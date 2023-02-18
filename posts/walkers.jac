@@ -19,7 +19,7 @@ walker import_news_data {
     }
 }
 
-# creates a post node and appends it to news_posts.json file
+# creates a post node
 walker create_post {
     
     has title;
@@ -75,6 +75,7 @@ walker update_post {
         if(code): here.code = code;
 
         report here;
+        disengage;
     }
 
 }
