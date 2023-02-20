@@ -3,18 +3,40 @@ walker import_news_data {
 
     can file.load_json;
 
-    root: take -->[0];
-    app_root: take --> node::posts;
-    posts{
-        post_nodes = --> node::post;
+    root: take -->[0]; //if at root, walk to app_root node
+    app_root: take --> node::posts; //if at app_root, walk to posts node
+
+    posts { //while on the posts node...
+        post_nodes = --> node::post; //grabs all connected post nodes connected to 'posts' as a list
         for n in post_nodes: destroy n; // delete all post nodes
 
-        news_posts = file.load_json(file_path); //get list of news posts
+        try {
+            news_posts = file.load_json(file_path); //get list of news posts
+            
+            for n in news_posts {
 
-        for n in news_posts{
-            nd = spawn node::post(title = n["title"], description = n["description"], source = n["source"], link = n["link"], image = n["image"], published = n["published"], code = n["code"]); // creates node
-            here +[posts_post(id = nd.info['jid'])]+> nd;
-            report nd;
+                // create post node with content from JSON
+                nd = spawn node::post(
+                    title = n["title"], 
+                    description = n["description"], 
+                    source = n["source"], 
+                    link = n["link"], 
+                    image = n["image"], 
+                    published = n["published"], 
+                    code = n["code"]); 
+
+                //connect the new post node to the posts node that we're currently on
+                //with an edge that is described by the id of the posts node
+                here +[posts_post(id = nd.info['jid'])]+> nd; 
+
+                //return the created node
+                report nd;
+            }
+
+        } else {
+            report:status = 400;
+            report "Invalid file path";
+            disengage; 
         }
     }
 }
