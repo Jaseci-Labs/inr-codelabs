@@ -13,11 +13,6 @@ Before you begin running any JAC program, always remember to install or update y
 
 `pip3 install jaseci-serv` or `pip3 install jaseci-serv --upgrade`
 
-You'll also need to install the jac_nlp module (this is needed for codelab-2)
-
-`pip install jac_nlp[all]`
-
-
 Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
 
 `jsserv makemigrations base`
@@ -53,12 +48,6 @@ Then, login to localhost.
 
 Enter username and password of superuser created above.
 If login successful, a token should be generated. We'll refer to this as ***my_token***.
-
-After logging in, we'll need to load the modules (this is needed for codelab-2).
-
-`actions load module jac_nlp.t5_sum`
-
-This might take a while, especially if you're running it for the first time.
 
 Open another WSL terminal. We'll refer to this as __*WSL T3*__.
 
