@@ -13,7 +13,7 @@ Before you begin running any JAC program, always remember to install or update y
 
 `pip3 install jaseci-serv` or `pip3 install jaseci-serv --upgrade`
 
-You'll also need to install the jac_nlp module (this is needed for codelab-2)
+You'll also need to install the jac_nlp module
 
 `pip install jac_nlp[all]`
 
@@ -54,7 +54,7 @@ Then, login to localhost.
 Enter username and password of superuser created above.
 If login successful, a token should be generated. We'll refer to this as ***my_token***.
 
-After logging in, we'll need to load the modules (this is needed for codelab-2).
+After logging in, we'll need to load the jac_nlp module
 
 `actions load module jac_nlp.t5_sum`
 
