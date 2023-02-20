@@ -113,7 +113,7 @@ This walker:
 ``` JSON
 {
     "name": "import_news_data",
-    "ctx": {"file_path": "./posts/news_posts.json"},
+    "ctx": {"file_path": "./news_posts.json"},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
     "profiling": false,
