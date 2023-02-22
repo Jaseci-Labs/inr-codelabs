@@ -147,3 +147,55 @@ walker summarize_posts {
         disengage;
     }
 }
+
+// must run walker summarize_posts before running this walker
+walker classify_posts {
+    can use.text_classify;
+
+    has post_nodes = [];
+    has all_tags = [];
+    has classes = [];
+
+    root: take -->[0];
+    app_root{
+        take--> node::tags;
+        take --> node::posts;
+    }
+    
+    tags: take -->;
+
+    tag {
+        statement_nodes = --> node::statement;
+        tag_statements = [];
+        for st_node in statement_nodes{
+            tag_statements.list::append(st_node.info["context"]["statement"]);
+            classes.list::append(st_node.info["context"]["statement"]);
+        }
+        t = {
+            "tag_id": here.info['jid'],
+            "tag": here.label,
+            "statement": tag_statements
+        };
+        all_tags.list::append(t);
+        take -->;
+    }
+
+    posts: post_nodes = --> node::post;
+
+    if (classes.length > 0):
+    for n in post_nodes {
+        post_tag_id = "";
+        resp = use.text_classify(
+            text = n.summary,
+            classes = classes
+        );
+
+        for tag in all_tags{
+            if (resp["match"] in tag["statement"]){
+                post_tag_id = tag["tag_id"];
+            }
+        }
+        n <+[post_tag(id = post_tag_id)]+> *post_tag_id; // edge from post to tag
+    }
+
+}

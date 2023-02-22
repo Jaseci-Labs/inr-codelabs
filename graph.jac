@@ -1,4 +1,5 @@
 import {*} with "./posts/graph.jac";
+import {*} with "./tags/graph.jac";
 
 node app_root;
 
@@ -9,6 +10,7 @@ graph app_graph {
     spawn {
         app_root = spawn node::app_root;
         posts = spawn app_root ++> node::posts;
+        tags = spawn app_root ++> node::tags;
     }
 
 }

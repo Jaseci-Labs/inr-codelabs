@@ -1,5 +1,6 @@
 import {*} with "./graph.jac";
 import {*} with "./posts/walkers.jac";
+import {*} with "./tags/walkers.jac";
 
 walker init {
 

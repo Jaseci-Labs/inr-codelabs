@@ -13,3 +13,7 @@ node post {
 edge posts_post {
     has id;
 }
+
+edge post_tag {
+    has id;
+}

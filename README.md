@@ -56,6 +56,8 @@ After logging in, we'll need to load the jac_nlp module
 
 `actions load module jac_nlp.t5_sum`
 
+`actions load module jac_nlp.use_enc`
+
 This might take a while, especially if you're running it for the first time.
 
 Open another WSL terminal. We'll refer to this as __*WSL T3*__.
@@ -212,6 +214,183 @@ This walker:
         "min_len": 50,
         "max_len": 100
     },
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker create_tag
+
+``` JSON
+{
+    "name": "create_tag",
+    "ctx": {"label": "Crimes"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+``` JSON
+{
+    "name": "create_tag",
+    "nd": "urn:uuid:6584e410-0812-4efb-9b4a-cdaf3b3191d3",
+    "ctx": {"label": "Domestic Abuse"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker update_tag
+
+``` JSON
+{
+    "name": "update_tag",
+    "nd": "urn:uuid:01a2f7d5-027a-443a-9dba-0b0f60ba9404",
+    "ctx": {"label": "Trafficking in Persons"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker list_tags
+
+``` JSON
+{
+    "name": "list_tags",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+``` JSON
+{
+    "name": "list_tags",
+    "nd": "urn:uuid:6584e410-0812-4efb-9b4a-cdaf3b3191d3",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker get_tag
+
+``` JSON
+{
+    "name": "get_tag",
+    "nd": "urn:uuid:6584e410-0812-4efb-9b4a-cdaf3b3191d3",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker delete_tag
+
+``` JSON
+{
+    "name": "delete_tag",
+    "nd": "urn:uuid:6584e410-0812-4efb-9b4a-cdaf3b3191d3",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker create_tag_statement
+
+``` JSON
+{
+    "name": "create_tag_statement",
+    "nd": "urn:uuid:40582857-a287-41a0-b845-408cfaf2d992",
+    "ctx": {"statement": "Blueface Responds to Chris Brown’s Domestic Violence Defense After He Mentions Chrisean Rock Relationship"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker update_tag_statement
+
+``` JSON
+{
+    "name": "update_tag_statement",
+    "nd": "urn:uuid:d305b894-238c-47c1-b930-43db9154840a",
+    "ctx": {"statement": "Latest Supreme Court-related ruling overturning gun regulations worries domestic violence survivor advocates"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker delete_tag_statement
+
+``` JSON
+{
+    "name": "delete_tag_statement",
+    "nd": "urn:uuid:d305b894-238c-47c1-b930-43db9154840a",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker list_tag_statement
+
+``` JSON
+{
+    "name": "list_tag_statement",
+    "nd": "urn:uuid:40582857-a287-41a0-b845-408cfaf2d992",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker get_tag_statement
+
+``` JSON
+{
+    "name": "get_tag_statement",
+    "nd": "urn:uuid:8231e969-b2d1-4152-b539-025470018692",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker classify_posts
+
+If you haven't already, please run __walker summarize_posts__ before running this request. This walker uses the summary to classify the posts.
+
+``` JSON
+{
+    "name": "classify_posts",
+    "ctx": {},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
     "profiling": false,
