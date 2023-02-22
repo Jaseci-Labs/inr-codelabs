@@ -9,8 +9,6 @@ Before you begin running any JAC program, always remember to install or update y
 
 `pip3 install jaseci` or `pip3 install jaseci --upgrade`
 
-`pip3 install jaseci-kit` or `pip3 install jaseci-kit --upgrade`
-
 `pip3 install jaseci-serv` or `pip3 install jaseci-serv --upgrade`
 
 Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
