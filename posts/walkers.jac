@@ -142,8 +142,10 @@ walker summarize_posts {
     app_root: take --> node::posts;
     posts{
         post_nodes = --> node::post;
-        for n in post_nodes: n.summary = t5_sum.classify_text(text = n.description, min_length = min_len, max_length = max_len);
-        report post_nodes;
+        for n in post_nodes {
+            if(!n.summary): n.summary = t5_sum.classify_text(text = n.description, min_length = min_len, max_length = max_len);
+            report n;
+        }
         disengage;
     }
 }
