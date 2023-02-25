@@ -52,7 +52,7 @@ Then, login to localhost.
 Enter username and password of superuser created above.
 If login successful, a token should be generated. We'll refer to this as ***my_token***.
 
-After logging in, we'll need to load the jac_nlp module
+After logging in, we'll need to load the modules: 
 
 `actions load module jac_nlp.t5_sum`
 
