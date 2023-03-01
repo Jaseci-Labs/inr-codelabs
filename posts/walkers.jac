@@ -202,3 +202,93 @@ walker classify_posts {
     }
 
 }
+
+// generates the embeddings for an array of text
+walker umap_cluster {
+    can use.encode;
+    can cluster.get_umap;
+    
+    has list_of_text;
+    has anchor embeddings;
+
+    embeddings = cluster.get_umap(use.encode(list_of_text),15, 0.1, 2, 42);
+}
+
+// allows you to generate hbdscan clusters based on the umap embeddings
+walker hbdscan_clusterings {
+    can cluster.get_cluster_labels;
+    can cluster.get_umap;
+    can use.encode;
+
+    has umap_embeddings;
+    has anchor clusters;
+
+    clusters = cluster.get_cluster_labels(umap_embeddings,"hbdscan",2,2); 
+}
+
+// allows you to generate kmeans clusters based on the umap embeddings
+walker kmean_clusterings {
+    can cluster.get_umap;
+    can use.encode;
+
+    has umap_embeddings;
+    has anchor clusters;
+
+    clusters = cluster.get_cluster_labels(umap_embeddings,"kmeans",2,2, n_clusters);
+}
+
+walker posts_cluster {
+    has list_of_titles = [];
+    has cluster_method = "hbdscan";
+    has clusters;
+    has n_clusters = 3;
+    has results = [];
+
+    can getClusterResults {
+        c = [];
+        for i=0 to i < clusters.length by i += 1 {
+            if (clusters[i] not in c){
+                c.list::append(clusters[i]);
+                results.list::append(
+                {
+                    "cluster": clusters[i],
+                    "list": []
+                }
+                );
+            }
+            for r in results {
+                if (r["cluster"] == clusters[i]){
+                    r["list"].list::append(list_of_text[i]);
+                    break;
+                }
+
+            }
+        }
+
+        report results;
+    }
+
+    root: take -->[0];
+    app_root: take --> node::posts;
+    posts{
+        post_nodes = --> node::post;
+        for p in post_nodes: list_of_titles.list::append(p.title);
+        if(list_of_titles.length <= 0){
+            report "No posts found! Please add a post.";
+            disengage;
+        }
+        umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_titles);
+        if (cluster_method == "hbdscan") {
+            hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
+            ::getClusterResults(clusters = hdb_data, list_of_text=list_of_titles);
+        }
+        elif (cluster_method == "kmean"){
+            kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
+            ::getClusterResults(clusters = kmean_data, list_of_text=list_of_titles);
+        }
+        else{
+            report "cluster_method must be either 'hbdscan' or 'kmean'.";
+            disengage;
+        }
+    }
+}

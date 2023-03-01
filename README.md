@@ -27,6 +27,7 @@ Now, try running `pip install jac_nlp[t5_sum]` again.
 
 `pip install jac_nlp[use_enc]`
 
+`pip install jac_misc[cluster]`
 
 Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
 
@@ -71,6 +72,8 @@ After logging in, we'll need to load the modules:
 `actions load local inr_actions.py`
 
 `actions load module jac_nlp.use_enc`
+
+`actions load module jac_misc.cluster`
 
 This might take a while, especially if you're running it for the first time.
 
