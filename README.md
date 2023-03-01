@@ -11,9 +11,21 @@ Before you begin running any JAC program, always remember to install or update y
 
 `pip3 install jaseci-serv` or `pip3 install jaseci-serv --upgrade`
 
-You'll also need to install the jac_nlp module
+You'll also need to install the modules:
 
-`pip install jac_nlp[all]`
+`pip install jac_nlp[t5_sum]`
+
+If you encountered an error while trying to install package - sentencepiece, then run the following 3 commands:
+
+`sudo apt-get install pkg-config`
+
+`sudo apt-get install cmake`
+
+`pip install sentencepiece`
+
+Now, try running `pip install jac_nlp[t5_sum]` again.
+
+`pip install jac_nlp[use_enc]`
 
 
 Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
@@ -55,6 +67,8 @@ If login successful, a token should be generated. We'll refer to this as ***my_t
 After logging in, we'll need to load the modules: 
 
 `actions load module jac_nlp.t5_sum`
+
+`actions load local inr_actions.py`
 
 `actions load module jac_nlp.use_enc`
 
