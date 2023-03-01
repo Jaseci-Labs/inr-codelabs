@@ -11,10 +11,19 @@ Before you begin running any JAC program, always remember to install or update y
 
 `pip3 install jaseci-serv` or `pip3 install jaseci-serv --upgrade`
 
-You'll also need to install the jac_nlp module
+You'll also need to install the jac_nlp module:
 
-`pip install jac_nlp[all]`
+`pip install jac_nlp[t5_sum]`
 
+If you encountered an error while trying to install package - sentencepiece, then run the following 3 commands:
+
+`sudo apt-get install pkg-config`
+
+`sudo apt-get install cmake`
+
+`pip install sentencepiece`
+
+Now, try running `pip install jac_nlp[t5_sum]` again.
 
 Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
 
