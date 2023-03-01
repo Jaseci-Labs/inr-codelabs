@@ -2,6 +2,7 @@ walker import_news_data {
     has file_path;
 
     can file.load_json;
+    can inr.remove_html_tags;
 
     root: take -->[0]; //if at root, walk to app_root node
     app_root: take --> node::posts; //if at app_root, walk to posts node
@@ -18,7 +19,7 @@ walker import_news_data {
                 // create post node with content from JSON
                 nd = spawn node::post(
                     title = n["title"], 
-                    description = n["description"], 
+                    description = inr.remove_html_tags(text = n["description"]),
                     source = n["source"], 
                     link = n["link"], 
                     image = n["image"], 
