@@ -65,6 +65,10 @@ After logging in, we'll need to load the jac_nlp module
 
 `actions load module jac_nlp.t5_sum`
 
+Then, load the custom action we created.
+
+`actions load local inr_actions.py`
+
 This might take a while, especially if you're running it for the first time.
 
 Open another WSL terminal. We'll refer to this as __*WSL T3*__.
