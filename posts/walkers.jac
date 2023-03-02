@@ -305,3 +305,9 @@ walker posts_cluster {
         }
     }
 }
+
+walker get_related_posts {
+    post {
+        report -[related]-> node::post;
+    }
+}

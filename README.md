@@ -456,3 +456,17 @@ The default cluster_method is hbdscan:
     "is_async": false
 }
 ```
+
+## walker get_related_posts
+
+``` JSON
+{
+    "name": "get_related_posts",
+    "nd": "urn:uuid:7d570cbe-5cb1-428f-9d96-5ced04bce499",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
