@@ -459,6 +459,8 @@ The default cluster_method is hbdscan:
 
 ## walker get_related_posts
 
+You'll need to run __walker posts_cluster__ at least once before running this request.
+
 ``` JSON
 {
     "name": "get_related_posts",
