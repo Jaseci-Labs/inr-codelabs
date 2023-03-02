@@ -265,8 +265,6 @@ walker posts_cluster {
 
             }
         }
-
-        report results;
     }
 
     root: take -->[0];
@@ -282,14 +280,28 @@ walker posts_cluster {
         if (cluster_method == "hbdscan") {
             hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
             ::getClusterResults(clusters = hdb_data, list_of_posts=post_nodes);
+            take -->;
         }
         elif (cluster_method == "kmean"){
             kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
             ::getClusterResults(clusters = kmean_data, list_of_posts=post_nodes);
+            take -->;
         }
         else{
             report "cluster_method must be either 'hbdscan' or 'kmean'.";
             disengage;
+        }
+    }
+
+    post {
+        for i in results {
+            if (here in i["list"]) {
+                related_posts_list = i["list"]; // list of all posts related to current post
+                related_posts = -[related]-> node::post; //  list of related posts connected to current post
+                for p in related_posts_list {
+                    if (p not in related_posts): here <+[related]+> p;
+                }
+            }
         }
     }
 }

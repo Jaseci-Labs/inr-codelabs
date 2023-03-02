@@ -417,6 +417,8 @@ If you haven't already, please run __walker summarize_posts__ before running thi
 
 ## walker posts_cluster
 
+You'll need to run __walker summarize_posts__ at least once before running this request.
+
 The default cluster_method is hbdscan:
 
 ``` JSON

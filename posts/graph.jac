@@ -17,3 +17,5 @@ edge posts_post {
 edge post_tag {
     has id;
 }
+
+edge related;
