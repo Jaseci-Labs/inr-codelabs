@@ -238,13 +238,14 @@ walker kmean_clusterings {
 }
 
 walker posts_cluster {
-    has list_of_titles = [];
+    has list_of_summary = [];
     has cluster_method = "hbdscan";
     has clusters;
     has n_clusters = 3;
     has results = [];
 
     can getClusterResults {
+        // creates a list of dictionaries, listing all the posts (nodes) for each cluster
         c = [];
         for i=0 to i < clusters.length by i += 1 {
             if (clusters[i] not in c){
@@ -258,7 +259,7 @@ walker posts_cluster {
             }
             for r in results {
                 if (r["cluster"] == clusters[i]){
-                    r["list"].list::append(list_of_text[i]);
+                    r["list"].list::append(list_of_posts[i]);
                     break;
                 }
 
@@ -272,19 +273,19 @@ walker posts_cluster {
     app_root: take --> node::posts;
     posts{
         post_nodes = --> node::post;
-        for p in post_nodes: list_of_titles.list::append(p.title);
-        if(list_of_titles.length <= 0){
+        for p in post_nodes: list_of_summary.list::append(p.summary); // creates a list of posts' summary
+        if(list_of_summary.length <= 0){
             report "No posts found! Please add a post.";
             disengage;
         }
-        umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_titles);
+        umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_summary); // creates a lists of embeddings using summary
         if (cluster_method == "hbdscan") {
             hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
-            ::getClusterResults(clusters = hdb_data, list_of_text=list_of_titles);
+            ::getClusterResults(clusters = hdb_data, list_of_posts=post_nodes);
         }
         elif (cluster_method == "kmean"){
             kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
-            ::getClusterResults(clusters = kmean_data, list_of_text=list_of_titles);
+            ::getClusterResults(clusters = kmean_data, list_of_posts=post_nodes);
         }
         else{
             report "cluster_method must be either 'hbdscan' or 'kmean'.";
