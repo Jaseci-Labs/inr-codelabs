@@ -414,3 +414,43 @@ If you haven't already, please run __walker summarize_posts__ before running thi
     "is_async": false
 }
 ```
+
+## walker posts_cluster
+
+The default cluster_method is hbdscan:
+
+``` JSON
+{
+    "name": "posts_cluster",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+``` JSON
+{
+    "name": "posts_cluster",
+    "ctx": {"cluster_method": "hbdscan"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+``` JSON
+{
+    "name": "posts_cluster",
+    "ctx": {
+        "cluster_method": "kmean",
+        "n_clusters": 5
+        },
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
