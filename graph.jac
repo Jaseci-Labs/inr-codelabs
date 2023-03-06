@@ -1,5 +1,5 @@
-import {*} with "./posts/graph.jac";
-import {*} with "./tags/graph.jac";
+import {*} with "./posts/posts_graph.jac";
+import {*} with "./tags/tags_graph.jac";
 
 node app_root;
 
