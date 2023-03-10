@@ -85,6 +85,13 @@ In __*WSL T2*__:
 We'll refer to the active:sentinel as ***my_sentinel_id***
 
 
+If you have already registered the sentinel, then just run:
+
+`sentinel set -snt active:sentinel -mode ir main.jir`
+
+You'll need to run this command after you build.
+
+
 ## In postman
 
 Create a new request:
