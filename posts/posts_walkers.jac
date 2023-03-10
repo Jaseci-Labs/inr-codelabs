@@ -41,6 +41,7 @@ walker import_news_data {
     }
 }
 
+
 # creates a post node
 walker create_post {
     
@@ -63,9 +64,17 @@ walker create_post {
             disengage;
         }
 
-        nd = spawn node::post(title = title, description = description, source = source, published = published, code = code); // creates node
+        // creates node
+        nd = spawn node::post(
+            title = title, 
+            description = description, 
+            source = source, 
+            published = published, 
+            code = code);
+
         if(link): nd.link = link;
         if(image): nd.image = image;
+
         here +[posts_post(id = nd.info['jid'])]+> nd; // creates the edge connected to posts node
 
         report nd;
@@ -101,6 +110,7 @@ walker update_post {
     }
 
 }
+
 
 # deletes post node; node jid must be specified in nd param
 walker delete_post {
