@@ -209,7 +209,7 @@ walker apply_tags {
 
         result = use.text_classify(
             text = _post.title,
-            classes = -[tag_statement]->.text; // pluck text value from nodes connected by tag_statement edges as list
+            classes = -[tag_statement]->.text // pluck text value from nodes connected by tag_statement edges as list
         );
 
         // grab index of match with highest score
