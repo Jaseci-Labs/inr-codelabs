@@ -217,15 +217,31 @@ walker apply_tags {
         // grab the score
         confidence = result["scores"][match_index];
 
+        // grabs the list of tags currently connected to the post
+        post_tags = spawn _post walker::get_post_tags;
+
         // if it makes our acceptance confidence level, we consider it
         if (confidence >= min_confidence) {
 
-            // establish the edge, if it doesn't exist
-            _post <+[tag_post(confidence = confidence)]+> here;
-            std.log("added tag" + here.label);
+            // if tag is already connected to post, skip it.
+            if (here in post_tags) {
+                std.log("already added tag: " + here.label);
+            } else {
+                // establish the edge, if it doesn't exist
+                _post <+[tag_post(confidence = confidence)]+> here;
+                std.log("added tag: " + here.label);
+            }
 
         } else {
             std.log("confidence too low, skipping");
         }
+    }
+}
+
+// returns a list of tag nodes connected to a post
+walker get_post_tags {
+    has anchor p_tags;
+    post {
+        p_tags = -[tag_post]-> node::tag;
     }
 }
