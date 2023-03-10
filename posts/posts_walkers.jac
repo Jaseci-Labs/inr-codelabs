@@ -19,7 +19,7 @@ walker import_news_data {
                 // create post node with content from JSON
                 nd = spawn node::post(
                     title = n["title"], 
-                    description = inr.remove_html_tags(text = n["description"]),
+                    description = inr.remove_html_tags(text = n["description"]), 
                     source = n["source"], 
                     link = n["link"], 
                     image = n["image"], 
@@ -41,6 +41,7 @@ walker import_news_data {
         }
     }
 }
+
 
 # creates a post node
 walker create_post {
@@ -64,9 +65,17 @@ walker create_post {
             disengage;
         }
 
-        nd = spawn node::post(title = title, description = description, source = source, published = published, code = code); // creates node
+        // creates node
+        nd = spawn node::post(
+            title = title, 
+            description = description, 
+            source = source, 
+            published = published, 
+            code = code);
+
         if(link): nd.link = link;
         if(image): nd.image = image;
+
         here +[posts_post(id = nd.info['jid'])]+> nd; // creates the edge connected to posts node
 
         report nd;
@@ -103,6 +112,7 @@ walker update_post {
 
 }
 
+
 # deletes post node; node jid must be specified in nd param
 walker delete_post {
     post {
@@ -135,70 +145,87 @@ walker list_posts {
 }
 
 walker summarize_posts {
+    // declare action
     can t5_sum.classify_text;
     has min_len;
     has max_len;
 
+    // head to branch posts node
     root: take -->[0];
     app_root: take --> node::posts;
+
     posts{
+        // grab list of posts
         post_nodes = --> node::post;
+
+        // for each post that doesn't have a summary, generate a summary from the description and save it in summary attribute
         for n in post_nodes {
             if(!n.summary): n.summary = t5_sum.classify_text(text = n.description, min_length = min_len, max_length = max_len);
+            std.log(n.summary);
             report n;
         }
         disengage;
     }
 }
 
-// must run walker summarize_posts before running this walker
-walker classify_posts {
-    can use.text_classify;
-
-    has post_nodes = [];
-    has all_tags = [];
-    has classes = [];
+// walk through all posts,
+// for each post, identify which tags are applicable and establish edges between them
+walker tag_posts {
 
     root: take -->[0];
-    app_root{
-        take--> node::tags;
-        take --> node::posts;
+    app_root: take --> node::posts;
+
+    posts {
+        take --> node::post;
     }
-    
-    tags: take -->;
+
+    post {
+        spawn here walker::apply_tags;
+    }
+}
+
+// takes a post and applies the best tags to it
+walker apply_tags {
+
+    can use.text_classify;
+    has min_confidence = 0.1;
+    has _post;
+
+    root: take -->[0];
+    app_root: take --> node::tags;
+
+    post {
+        _post = here;
+        std.log("grabbed post node: " + _post.title);
+        take net.root(); //head back to root
+    }
+
+    tags {
+        take --> node::tag;
+    }
 
     tag {
-        statement_nodes = --> node::statement;
-        tag_statements = [];
-        for st_node in statement_nodes{
-            tag_statements.list::append(st_node.info["context"]["statement"]);
-            classes.list::append(st_node.info["context"]["statement"]);
-        }
-        t = {
-            "tag_id": here.info['jid'],
-            "tag": here.label,
-            "statement": tag_statements
-        };
-        all_tags.list::append(t);
-        take -->;
-    }
+        std.log("examining tag: " + here.label);
 
-    posts: post_nodes = --> node::post;
-
-    if (classes.length > 0):
-    for n in post_nodes {
-        post_tag_id = "";
-        resp = use.text_classify(
-            text = n.summary,
-            classes = classes
+        result = use.text_classify(
+            text = _post.title,
+            classes = -[tag_statement]->.text; // pluck text value from nodes connected by tag_statement edges as list
         );
 
-        for tag in all_tags{
-            if (resp["match"] in tag["statement"]){
-                post_tag_id = tag["tag_id"];
-            }
-        }
-        n <+[post_tag(id = post_tag_id)]+> *post_tag_id; // edge from post to tag
-    }
+        // grab index of match with highest score
+        match_index = result["match_idx"];
+        // grab the score
+        confidence = result["scores"][match_index];
 
+        // if it makes our acceptance confidence level, we consider it
+        if (confidence >= min_confidence) {
+
+            // establish the edge, if it doesn't exist
+            _post <+[tag_post(confidence = confidence)]+> here;
+            std.log("added tag" + here.label);
+
+        } else {
+            std.log("confidence too low, skipping");
+        }
+    }
 }
