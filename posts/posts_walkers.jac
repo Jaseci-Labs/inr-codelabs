@@ -41,6 +41,7 @@ walker import_news_data {
     }
 }
 
+
 # creates a post node
 walker create_post {
     
@@ -63,9 +64,17 @@ walker create_post {
             disengage;
         }
 
-        nd = spawn node::post(title = title, description = description, source = source, published = published, code = code); // creates node
+        // creates node
+        nd = spawn node::post(
+            title = title, 
+            description = description, 
+            source = source, 
+            published = published, 
+            code = code);
+
         if(link): nd.link = link;
         if(image): nd.image = image;
+
         here +[posts_post(id = nd.info['jid'])]+> nd; // creates the edge connected to posts node
 
         report nd;
@@ -102,6 +111,7 @@ walker update_post {
 
 }
 
+
 # deletes post node; node jid must be specified in nd param
 walker delete_post {
     post {
@@ -134,16 +144,23 @@ walker list_posts {
 }
 
 walker summarize_posts {
+    // declare action
     can t5_sum.classify_text;
     has min_len;
     has max_len;
 
+    // head to branch posts node
     root: take -->[0];
     app_root: take --> node::posts;
+
     posts{
+        // grab list of posts
         post_nodes = --> node::post;
+
+        // for each post that doesn't have a summary, generate a summary from the description and save it in summary attribute
         for n in post_nodes {
             if(!n.summary): n.summary = t5_sum.classify_text(text = n.description, min_length = min_len, max_length = max_len);
+            std.log(n.summary);
             report n;
         }
         disengage;
