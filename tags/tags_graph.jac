@@ -1,16 +1,16 @@
 node tags;
+
 node tag {
     has label;
 }
 
-edge tags_tag {
-    has id;
+edge parent;
+edge child;
+edge tag_statement;
+edge tag_post {
+    has confidence;
 }
 
 node statement {
-    has statement;
-}
-
-edge tag_statement {
-    has id;
+    has text;
 }

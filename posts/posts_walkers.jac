@@ -19,7 +19,7 @@ walker import_news_data {
                 // create post node with content from JSON
                 nd = spawn node::post(
                     title = n["title"], 
-                    description = inr.remove_html_tags(text = n["description"]),
+                    description = inr.remove_html_tags(text = n["description"]), 
                     source = n["source"], 
                     link = n["link"], 
                     image = n["image"], 
@@ -41,6 +41,7 @@ walker import_news_data {
         }
     }
 }
+
 
 # creates a post node
 walker create_post {
@@ -64,9 +65,17 @@ walker create_post {
             disengage;
         }
 
-        nd = spawn node::post(title = title, description = description, source = source, published = published, code = code); // creates node
+        // creates node
+        nd = spawn node::post(
+            title = title, 
+            description = description, 
+            source = source, 
+            published = published, 
+            code = code);
+
         if(link): nd.link = link;
         if(image): nd.image = image;
+
         here +[posts_post(id = nd.info['jid'])]+> nd; // creates the edge connected to posts node
 
         report nd;
@@ -103,6 +112,7 @@ walker update_post {
 
 }
 
+
 # deletes post node; node jid must be specified in nd param
 walker delete_post {
     post {
@@ -135,179 +145,103 @@ walker list_posts {
 }
 
 walker summarize_posts {
+    // declare action
     can t5_sum.classify_text;
     has min_len;
     has max_len;
 
+    // head to branch posts node
     root: take -->[0];
     app_root: take --> node::posts;
+
     posts{
+        // grab list of posts
         post_nodes = --> node::post;
+
+        // for each post that doesn't have a summary, generate a summary from the description and save it in summary attribute
         for n in post_nodes {
             if(!n.summary): n.summary = t5_sum.classify_text(text = n.description, min_length = min_len, max_length = max_len);
+            std.log(n.summary);
             report n;
         }
         disengage;
     }
 }
 
-// must run walker summarize_posts before running this walker
-walker classify_posts {
-    can use.text_classify;
-
-    has post_nodes = [];
-    has all_tags = [];
-    has classes = [];
-
-    root: take -->[0];
-    app_root{
-        take--> node::tags;
-        take --> node::posts;
-    }
-    
-    tags: take -->;
-
-    tag {
-        statement_nodes = --> node::statement;
-        tag_statements = [];
-        for st_node in statement_nodes{
-            tag_statements.list::append(st_node.info["context"]["statement"]);
-            classes.list::append(st_node.info["context"]["statement"]);
-        }
-        t = {
-            "tag_id": here.info['jid'],
-            "tag": here.label,
-            "statement": tag_statements
-        };
-        all_tags.list::append(t);
-        take -->;
-    }
-
-    posts: post_nodes = --> node::post;
-
-    if (classes.length > 0):
-    for n in post_nodes {
-        post_tag_id = "";
-        resp = use.text_classify(
-            text = n.summary,
-            classes = classes
-        );
-
-        for tag in all_tags{
-            if (resp["match"] in tag["statement"]){
-                post_tag_id = tag["tag_id"];
-            }
-        }
-        n <+[post_tag(id = post_tag_id)]+> *post_tag_id; // edge from post to tag
-    }
-
-}
-
-// generates the embeddings for an array of text
-walker umap_cluster {
-    can use.encode;
-    can cluster.get_umap;
-    
-    has list_of_text;
-    has anchor embeddings;
-
-    embeddings = cluster.get_umap(use.encode(list_of_text),15, 0.1, 2, 42);
-}
-
-// allows you to generate hbdscan clusters based on the umap embeddings
-walker hbdscan_clusterings {
-    can cluster.get_cluster_labels;
-    can cluster.get_umap;
-    can use.encode;
-
-    has umap_embeddings;
-    has anchor clusters;
-
-    clusters = cluster.get_cluster_labels(umap_embeddings,"hbdscan",2,2); 
-}
-
-// allows you to generate kmeans clusters based on the umap embeddings
-walker kmean_clusterings {
-    can cluster.get_umap;
-    can use.encode;
-
-    has umap_embeddings;
-    has anchor clusters;
-
-    clusters = cluster.get_cluster_labels(umap_embeddings,"kmeans",2,2, n_clusters);
-}
-
-walker posts_cluster {
-    has list_of_summary = [];
-    has cluster_method = "hbdscan";
-    has clusters;
-    has n_clusters = 3;
-    has results = [];
-
-    can getClusterResults {
-        // creates a list of dictionaries, listing all the posts (nodes) for each cluster
-        c = [];
-        for i=0 to i < clusters.length by i += 1 {
-            if (clusters[i] not in c){
-                c.list::append(clusters[i]);
-                results.list::append(
-                {
-                    "cluster": clusters[i],
-                    "list": []
-                }
-                );
-            }
-            for r in results {
-                if (r["cluster"] == clusters[i]){
-                    r["list"].list::append(list_of_posts[i]);
-                    break;
-                }
-
-            }
-        }
-    }
+// walk through all posts,
+// for each post, identify which tags are applicable and establish edges between them
+walker tag_posts {
 
     root: take -->[0];
     app_root: take --> node::posts;
-    posts{
-        post_nodes = --> node::post;
-        for p in post_nodes: list_of_summary.list::append(p.summary); // creates a list of posts' summary
-        if(list_of_summary.length <= 0){
-            report "No posts found! Please add a post.";
-            disengage;
-        }
-        umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_summary); // creates a lists of embeddings using summary
-        if (cluster_method == "hbdscan") {
-            hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
-            ::getClusterResults(clusters = hdb_data, list_of_posts=post_nodes);
-            take -->;
-        }
-        elif (cluster_method == "kmean"){
-            kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
-            ::getClusterResults(clusters = kmean_data, list_of_posts=post_nodes);
-            take -->;
-        }
-        else{
-            report "cluster_method must be either 'hbdscan' or 'kmean'.";
-            disengage;
-        }
+
+    posts {
+        take --> node::post;
     }
 
     post {
-        for i in results {
-            if (here in i["list"]) {
-                related_posts_list = i["list"]; // list of all posts related to current post
-                related_posts = -[related]-> node::post; //  list of related posts connected to current post
-                for p in related_posts_list {
-                    if (p not in related_posts): here <+[related]+> p;
-                }
+        spawn here walker::apply_tags;
+    }
+}
+
+// takes a post and applies the best tags to it
+walker apply_tags {
+
+    can use.text_classify;
+    has min_confidence = 0.1;
+    has _post;
+
+    root: take -->[0];
+    app_root: take --> node::tags;
+
+    post {
+        _post = here;
+        std.log("grabbed post node: " + _post.title);
+        take net.root(); //head back to root
+    }
+
+    tags {
+        take --> node::tag;
+    }
+
+    tag {
+        std.log("examining tag: " + here.label);
+
+        result = use.text_classify(
+            text = _post.title,
+            classes = -[tag_statement]->.text // pluck text value from nodes connected by tag_statement edges as list
+        );
+
+        // grab index of match with highest score
+        match_index = result["match_idx"];
+        // grab the score
+        confidence = result["scores"][match_index];
+
+        // grabs the list of tags currently connected to the post
+        post_tags = spawn _post walker::get_post_tags;
+
+        // if it makes our acceptance confidence level, we consider it
+        if (confidence >= min_confidence) {
+
+            // if tag is already connected to post, skip it.
+            if (here in post_tags) {
+                std.log("already added tag: " + here.label);
+            } else {
+                // establish the edge, if it doesn't exist
+                _post <+[tag_post(confidence = confidence)]+> here;
+                std.log("added tag: " + here.label);
             }
+
+        } else {
+            std.log("confidence too low, skipping");
         }
     }
 }
 
-walker get_related_posts {
+// returns a list of tag nodes connected to a post
+walker get_post_tags {
+    has anchor p_tags;
     post {
-        report -[related]-> node::post;
+        p_tags = -[tag_post]-> node::tag;
     }
 }
