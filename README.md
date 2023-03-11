@@ -134,7 +134,24 @@ This walker:
 ``` JSON
 {
     "name": "import_news_data",
-    "ctx": {"file_path": "./news_posts.json"},
+    "ctx": {"file_path": "news_posts.json"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker import_tag_data
+
+This walker:
+- deletes all the tag nodes from the graph.
+- creates the tag nodes using data from the JSON file.
+
+``` JSON
+{
+    "name": "import_tag_data",
+    "ctx": {"file_path": "tag_data.json"},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
     "profiling": false,
@@ -258,8 +275,7 @@ This walker:
 ``` JSON
 {
     "name": "create_tag",
-    "nd": "urn:uuid:6584e410-0812-4efb-9b4a-cdaf3b3191d3",
-    "ctx": {"label": "Domestic Abuse"},
+    "ctx": {"label": "Domestic Abuse", "parent_jid": "urn:uuid:6584e410-0812-4efb-9b4a-cdaf3b3191d3"},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
     "profiling": false,
@@ -281,22 +297,11 @@ This walker:
 }
 ```
 
-## walker list_tags
+## walker delete_tag
 
 ``` JSON
 {
-    "name": "list_tags",
-    "ctx": {},
-    "_req_ctx": {},
-    "snt": "my_sentinel_id",
-    "profiling": false,
-    "is_async": false
-}
-```
-
-``` JSON
-{
-    "name": "list_tags",
+    "name": "delete_tag",
     "nd": "urn:uuid:6584e410-0812-4efb-9b4a-cdaf3b3191d3",
     "ctx": {},
     "_req_ctx": {},
@@ -320,12 +325,12 @@ This walker:
 }
 ```
 
-## walker delete_tag
+
+## walker list_tags
 
 ``` JSON
 {
-    "name": "delete_tag",
-    "nd": "urn:uuid:6584e410-0812-4efb-9b4a-cdaf3b3191d3",
+    "name": "list_tags",
     "ctx": {},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
@@ -334,13 +339,14 @@ This walker:
 }
 ```
 
-## walker create_tag_statement
+
+## walker add_statement
 
 ``` JSON
 {
-    "name": "create_tag_statement",
+    "name": "add_statement",
     "nd": "urn:uuid:40582857-a287-41a0-b845-408cfaf2d992",
-    "ctx": {"statement": "Blueface Responds to Chris Brown’s Domestic Violence Defense After He Mentions Chrisean Rock Relationship"},
+    "ctx": {"text": "Blueface Responds to Chris Brown’s Domestic Violence Defense After He Mentions Chrisean Rock Relationship"},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
     "profiling": false,
@@ -348,39 +354,11 @@ This walker:
 }
 ```
 
-## walker update_tag_statement
+## walker list_statements
 
 ``` JSON
 {
-    "name": "update_tag_statement",
-    "nd": "urn:uuid:d305b894-238c-47c1-b930-43db9154840a",
-    "ctx": {"statement": "Latest Supreme Court-related ruling overturning gun regulations worries domestic violence survivor advocates"},
-    "_req_ctx": {},
-    "snt": "my_sentinel_id",
-    "profiling": false,
-    "is_async": false
-}
-```
-
-## walker delete_tag_statement
-
-``` JSON
-{
-    "name": "delete_tag_statement",
-    "nd": "urn:uuid:d305b894-238c-47c1-b930-43db9154840a",
-    "ctx": {},
-    "_req_ctx": {},
-    "snt": "my_sentinel_id",
-    "profiling": false,
-    "is_async": false
-}
-```
-
-## walker list_tag_statement
-
-``` JSON
-{
-    "name": "list_tag_statement",
+    "name": "list_statements",
     "nd": "urn:uuid:40582857-a287-41a0-b845-408cfaf2d992",
     "ctx": {},
     "_req_ctx": {},
@@ -390,11 +368,40 @@ This walker:
 }
 ```
 
-## walker get_tag_statement
+## walker update_statement
 
 ``` JSON
 {
-    "name": "get_tag_statement",
+    "name": "update_statement",
+    "nd": "urn:uuid:d305b894-238c-47c1-b930-43db9154840a",
+    "ctx": {"text": "Latest Supreme Court-related ruling overturning gun regulations worries domestic violence survivor advocates"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker delete_statement
+
+``` JSON
+{
+    "name": "delete_statement",
+    "nd": "urn:uuid:d305b894-238c-47c1-b930-43db9154840a",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+
+## walker get_statement
+
+``` JSON
+{
+    "name": "get_statement",
     "nd": "urn:uuid:8231e969-b2d1-4152-b539-025470018692",
     "ctx": {},
     "_req_ctx": {},
@@ -404,13 +411,11 @@ This walker:
 }
 ```
 
-## walker classify_posts
-
-If you haven't already, please run __walker summarize_posts__ before running this request. This walker uses the summary to classify the posts.
+## walker tag_posts
 
 ``` JSON
 {
-    "name": "classify_posts",
+    "name": "tag_posts",
     "ctx": {},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
