@@ -245,3 +245,113 @@ walker get_post_tags {
         p_tags = -[tag_post]-> node::tag;
     }
 }
+
+
+// generates the embeddings for an array of text
+walker umap_cluster {
+    can use.encode;
+    can cluster.get_umap;
+    
+    has list_of_text;
+    has anchor embeddings;
+
+    embeddings = cluster.get_umap(use.encode(list_of_text),15, 0.1, 2, 42);
+}
+
+// allows you to generate hbdscan clusters based on the umap embeddings
+walker hbdscan_clusterings {
+    can cluster.get_cluster_labels;
+    can cluster.get_umap;
+    can use.encode;
+
+    has umap_embeddings;
+    has anchor clusters;
+
+    clusters = cluster.get_cluster_labels(umap_embeddings,"hbdscan",2,2); 
+}
+
+// allows you to generate kmeans clusters based on the umap embeddings
+walker kmean_clusterings {
+    can cluster.get_umap;
+    can use.encode;
+
+    has umap_embeddings;
+    has anchor clusters;
+
+    clusters = cluster.get_cluster_labels(umap_embeddings,"kmeans",2,2, n_clusters);
+}
+
+walker posts_cluster {
+    has list_of_summary = [];
+    has cluster_method = "hbdscan";
+    has clusters;
+    has n_clusters = 3;
+    has results = [];
+
+    can getClusterResults {
+        // creates a list of dictionaries, listing all the posts (nodes) for each cluster
+        c = [];
+        for i=0 to i < clusters.length by i += 1 {
+            if (clusters[i] not in c){
+                c.list::append(clusters[i]);
+                results.list::append(
+                {
+                    "cluster": clusters[i],
+                    "list": []
+                }
+                );
+            }
+            for r in results {
+                if (r["cluster"] == clusters[i]){
+                    r["list"].list::append(list_of_posts[i]);
+                    break;
+                }
+
+            }
+        }
+    }
+
+    root: take -->[0];
+    app_root: take --> node::posts;
+    posts{
+        post_nodes = --> node::post;
+        for p in post_nodes: list_of_summary.list::append(p.summary); // creates a list of posts' summary
+        if(list_of_summary.length <= 0){
+            report "No posts found! Please add a post.";
+            disengage;
+        }
+        umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_summary); // creates a lists of embeddings using summary
+        if (cluster_method == "hbdscan") {
+            hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
+            ::getClusterResults(clusters = hdb_data, list_of_posts=post_nodes);
+            take -->;
+        }
+        elif (cluster_method == "kmean"){
+            kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
+            ::getClusterResults(clusters = kmean_data, list_of_posts=post_nodes);
+            take -->;
+        }
+        else{
+            report "cluster_method must be either 'hbdscan' or 'kmean'.";
+            disengage;
+        }
+    }
+
+    post {
+        for i in results {
+            if (here in i["list"]) {
+                related_posts_list = i["list"]; // list of all posts related to current post
+                related_posts = -[related]-> node::post; //  list of related posts connected to current post
+                for p in related_posts_list {
+                    if (p not in related_posts): here <+[related]+> p;
+                }
+            }
+        }
+    }
+}
+
+walker get_related_posts {
+    post {
+        report -[related]-> node::post;
+    }
+}

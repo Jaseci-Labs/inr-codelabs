@@ -27,6 +27,8 @@ Now, try running `pip install jac_nlp[t5_sum]` again.
 
 `pip install jac_nlp[use_enc]`
 
+`pip install jac_misc[cluster]`
+
 
 Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
 
@@ -71,6 +73,8 @@ After logging in, we'll need to load the modules:
 `actions load local inr_actions.py`
 
 `actions load module jac_nlp.use_enc`
+
+`actions load module jac_misc.cluster`
 
 This might take a while, especially if you're running it for the first time.
 
@@ -416,6 +420,64 @@ This walker:
 ``` JSON
 {
     "name": "tag_posts",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker posts_cluster
+
+You'll need to run __walker summarize_posts__ at least once before running this request.
+
+The default cluster_method is hbdscan:
+
+``` JSON
+{
+    "name": "posts_cluster",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+``` JSON
+{
+    "name": "posts_cluster",
+    "ctx": {"cluster_method": "hbdscan"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+``` JSON
+{
+    "name": "posts_cluster",
+    "ctx": {
+        "cluster_method": "kmean",
+        "n_clusters": 5
+        },
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker get_related_posts
+
+You'll need to run __walker posts_cluster__ at least once before running this request.
+
+``` JSON
+{
+    "name": "get_related_posts",
+    "nd": "urn:uuid:7d570cbe-5cb1-428f-9d96-5ced04bce499",
     "ctx": {},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
