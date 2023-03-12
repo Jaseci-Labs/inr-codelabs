@@ -436,7 +436,7 @@ The default cluster_method is hbdscan:
 
 ``` JSON
 {
-    "name": "posts_cluster",
+    "name": "get_clusters",
     "ctx": {},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
@@ -447,7 +447,7 @@ The default cluster_method is hbdscan:
 
 ``` JSON
 {
-    "name": "posts_cluster",
+    "name": "get_clusters",
     "ctx": {"cluster_method": "hbdscan"},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
@@ -458,7 +458,7 @@ The default cluster_method is hbdscan:
 
 ``` JSON
 {
-    "name": "posts_cluster",
+    "name": "get_clusters",
     "ctx": {
         "cluster_method": "kmean",
         "n_clusters": 5
@@ -472,7 +472,7 @@ The default cluster_method is hbdscan:
 
 ## walker get_related_posts
 
-You'll need to run __walker posts_cluster__ at least once before running this request.
+You'll need to run __walker get_clusters__ at least once before running this request.
 
 ``` JSON
 {

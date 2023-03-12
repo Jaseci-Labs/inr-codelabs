@@ -281,73 +281,66 @@ walker kmean_clusterings {
     clusters = cluster.get_cluster_labels(umap_embeddings,"kmeans",2,2, n_clusters);
 }
 
-walker posts_cluster {
-    has list_of_summary = [];
-    has cluster_method = "hbdscan";
+// connects related posts
+walker get_clusters {
     has clusters;
+    has cluster_method = "hbdscan";
     has n_clusters = 3;
-    has results = [];
 
-    can getClusterResults {
-        // creates a list of dictionaries, listing all the posts (nodes) for each cluster
-        c = [];
-        for i=0 to i < clusters.length by i += 1 {
-            if (clusters[i] not in c){
-                c.list::append(clusters[i]);
-                results.list::append(
-                {
-                    "cluster": clusters[i],
-                    "list": []
-                }
-                );
-            }
-            for r in results {
-                if (r["cluster"] == clusters[i]){
-                    r["list"].list::append(list_of_posts[i]);
-                    break;
-                }
-
-            }
-        }
-    }
+    can inr.zip_list;
+    can inr.get_cluster_list;
 
     root: take -->[0];
     app_root: take --> node::posts;
-    posts{
-        post_nodes = --> node::post;
-        for p in post_nodes: list_of_summary.list::append(p.summary); // creates a list of posts' summary
-        if(list_of_summary.length <= 0){
+    posts{ // while on posts node ...
+        if((-[posts_post]->).length > 0){   // check if there is post
+            list_of_summary = -[posts_post]->.summary; // plucks a list of summary values fom nodes
+            // getting a list of post node jid
+            posts_jid = [];
+            for n in (-[posts_post]->): posts_jid.list::append(n.info['jid']);
+            // creates a list of embeddings using posts summary
+            umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_summary);
+            // generates hbd clusters based on umap embeddings
+            if (cluster_method == "hbdscan") {
+                hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
+                clusters = inr.zip_list(d_keys=posts_jid, d_values=hdb_data);
+            }
+            // generates kmeans clusters based on umap embeddings
+            elif (cluster_method == "kmean"){
+                kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
+                clusters = inr.zip_list(d_keys=posts_jid, d_values=kmean_data);
+            }
+            else{
+                report "cluster_method must be either 'hbdscan' or 'kmean'.";
+                disengage;
+            }
+            std.log(clusters);
+            take -->;
+        } 
+        else { // if no post exist...
             report "No posts found! Please add a post.";
             disengage;
         }
-        umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_summary); // creates a lists of embeddings using summary
-        if (cluster_method == "hbdscan") {
-            hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
-            ::getClusterResults(clusters = hdb_data, list_of_posts=post_nodes);
-            take -->;
-        }
-        elif (cluster_method == "kmean"){
-            kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
-            ::getClusterResults(clusters = kmean_data, list_of_posts=post_nodes);
-            take -->;
-        }
-        else{
-            report "cluster_method must be either 'hbdscan' or 'kmean'.";
-            disengage;
-        }
     }
-
     post {
-        for i in results {
-            if (here in i["list"]) {
-                related_posts_list = i["list"]; // list of all posts related to current post
-                related_posts = -[related]-> node::post; //  list of related posts connected to current post
-                for p in related_posts_list {
-                    if (p not in related_posts): here <+[related]+> p;
+        // grabs list of jids related to this post 
+        related_jid = inr.get_cluster_list(item=here.info['jid'], clusters=clusters);
+        if (related_jid.length > 0) {
+            for i in related_jid {
+                if( *i in (-[related]->)) {
+                    std.log("already connected to: "+ i);
+                }
+                else {
+                    here <+[related]+>*i;
+                    std.log("connecting to: "+ i);
                 }
             }
         }
+        else {
+            std.log("no post related to "+here.title);
+        }
     }
+    
 }
 
 walker get_related_posts {
