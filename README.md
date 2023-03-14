@@ -13,7 +13,7 @@ Before you begin running any JAC program, always remember to install or update y
 
 You'll also need to install the modules:
 
-`pip install jac_nlp[t5_sum]`
+`pip install jac_nlp[all]`
 
 If you encountered an error while trying to install package - sentencepiece, then run the following 3 commands:
 
@@ -23,9 +23,7 @@ If you encountered an error while trying to install package - sentencepiece, the
 
 `pip install sentencepiece`
 
-Now, try running `pip install jac_nlp[t5_sum]` again.
-
-`pip install jac_nlp[use_enc]`
+Now, try running `pip install jac_nlp[all]` again.
 
 
 Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
@@ -70,7 +68,7 @@ After logging in, we'll need to load the modules:
 
 `actions load local inr_actions.py`
 
-`actions load module jac_nlp.use_enc`
+`actions load module jac_nlp.use_qa`
 
 This might take a while, especially if you're running it for the first time.
 
@@ -417,6 +415,19 @@ This walker:
 {
     "name": "tag_posts",
     "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker semantic_search
+
+``` JSON
+{
+    "name": "semantic_search",
+    "ctx": {"query": "What's the latest in the oil and gas industry in Guyana?"},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
     "profiling": false,

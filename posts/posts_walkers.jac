@@ -229,3 +229,33 @@ walker apply_tags {
         }
     }
 }
+
+
+walker semantic_search {
+    has query;
+    has min_confidence = 0.15;
+
+    can use.qa_similarity;
+
+    root: take -->[0];
+    app_root: take --> node::posts;
+
+    posts {
+        
+        if(!query) {
+            report:status = 400;
+            report "Missing required parameter";
+            disengage;
+        }
+
+        take --> node::post;
+    }
+
+    post {
+        cos_score = use.qa_similarity(text1 = here.summary, text2 = query);
+        if(cos_score >= min_confidence) {
+            report {"score": cos_score, "post": here};
+        }
+    }
+ 
+}
