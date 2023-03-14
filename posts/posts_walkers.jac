@@ -259,3 +259,104 @@ walker semantic_search {
     }
  
 }
+
+// generates the embeddings for an array of text
+walker umap_cluster {
+    can use.encode;
+    can cluster.get_umap;
+
+    has list_of_text;
+    has anchor embeddings;
+
+    embeddings = cluster.get_umap(use.encode(list_of_text),15, 0.1, 2, 42);
+}
+
+// allows you to generate hbdscan clusters based on the umap embeddings
+walker hbdscan_clusterings {
+    can cluster.get_cluster_labels;
+    can cluster.get_umap;
+    can use.encode;
+
+    has umap_embeddings;
+    has anchor clusters;
+
+    clusters = cluster.get_cluster_labels(umap_embeddings,"hbdscan",2,2); 
+}
+
+// allows you to generate kmeans clusters based on the umap embeddings
+walker kmean_clusterings {
+    can cluster.get_umap;
+    can use.encode;
+
+    has umap_embeddings;
+    has anchor clusters;
+
+    clusters = cluster.get_cluster_labels(umap_embeddings,"kmeans",2,2, n_clusters);
+}
+
+// connects related posts
+walker get_clusters {
+    has clusters;
+    has cluster_method = "hbdscan";
+    has n_clusters = 3;
+
+    can inr.zip_list;
+    can inr.get_cluster_list;
+
+    root: take -->[0];
+    app_root: take --> node::posts;
+    posts{ // while on posts node ...
+        if((-[posts_post]->).length > 0){   // check if there is post
+            list_of_summary = -[posts_post]->.summary; // plucks a list of summary values fom nodes
+            // getting a list of post node jid
+            posts_jid = -[posts_post]->.edge.id;
+            // creates a list of embeddings using posts summary
+            umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_summary);
+            // generates hbd clusters based on umap embeddings
+            if (cluster_method == "hbdscan") {
+                hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
+                clusters = inr.zip_list(d_keys=posts_jid, d_values=hdb_data);
+            }
+            // generates kmeans clusters based on umap embeddings
+            elif (cluster_method == "kmean"){
+                kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
+                clusters = inr.zip_list(d_keys=posts_jid, d_values=kmean_data);
+            }
+            else{
+                report "cluster_method must be either 'hbdscan' or 'kmean'.";
+                disengage;
+            }
+            std.log(clusters);
+            take -->;
+        } 
+        else { // if no post exist...
+            report "No posts found! Please create or import a post.";
+            disengage;
+        }
+    }
+    post {
+        // grabs list of jids related to this post 
+        related_jid = inr.get_cluster_list(item=here.info['jid'], clusters=clusters);
+        if (related_jid.length > 0) {
+            for i in related_jid {
+                if( *i in (-[related]->)) {
+                    std.log("already connected to: "+ i);
+                }
+                else {
+                    here <+[related]+>*i;
+                    std.log("connecting to: "+ i);
+                }
+            }
+        }
+        else {
+            std.log("no post related to "+here.title);
+        }
+    }
+
+}
+
+walker get_related_posts {
+    post {
+        report -[related]-> node::post;
+    }
+}
