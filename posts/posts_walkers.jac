@@ -299,6 +299,7 @@ walker get_clusters {
     has clusters;
     has cluster_method = "hbdscan";
     has n_clusters = 3;
+    has posts_jid = [];
 
     can inr.zip_list;
     can inr.get_cluster_list;
