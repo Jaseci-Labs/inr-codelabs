@@ -300,8 +300,7 @@ walker get_clusters {
     has cluster_method = "hbdscan";
     has n_clusters = 3;
 
-    can inr.zip_list;
-    can inr.get_cluster_list;
+    can inr.zip_list, inr.get_cluster_list;
 
     root: take -->[0];
     app_root: take --> node::posts;
