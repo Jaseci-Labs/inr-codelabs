@@ -1,7 +1,7 @@
 [
     "tag",
-    "news source",
-    "timestamp start",
-    "timestamp end",
+    "news_source",
+    "timestamp_start",
+    "timestamp_end",
     "timestamp"
 ]
