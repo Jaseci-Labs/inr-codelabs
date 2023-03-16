@@ -78,6 +78,12 @@ After logging in, we'll need to load the modules:
 
 `actions load module jac_misc.cluster`
 
+`actions load module jac_nlp.tfm_ner`
+
+`actions load module jac_nlp.zs_classifier`
+
+`actions load module jac_nlp.bart_sum`
+
 This might take a while, especially if you're running it for the first time.
 
 Open another WSL terminal. We'll refer to this as __*WSL T3*__.
@@ -104,6 +110,17 @@ If you have already registered the sentinel, then just run:
 
 You'll need to run this command after you build.
 
+Train the NER model
+
+`walker run tfm_ner_train_model`
+
+Save the NER model
+
+`walker run tfm_ner_save_model -ctx "{\"model_path\" : \"ai/models/tfm_ner\"}"`
+
+If NER model already trained and ready to be loaded from source
+
+`walker run tfm_ner_load_model -ctx "{\"model_path\" : \"ai/models/tfm_ner\"}"`
 
 ## In postman
 
