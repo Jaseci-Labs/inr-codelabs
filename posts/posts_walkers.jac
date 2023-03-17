@@ -360,3 +360,98 @@ walker get_related_posts {
         report -[related]-> node::post;
     }
 }
+
+// extract entities from query inputted by user
+walker query_entities {
+    has utterance;
+    has anchor entities = {};
+
+    can extract_entities {
+        
+        try {
+            entity_list = file.load_json(global.entity_list);
+        } else {
+            std.log("Could not load entity list.");
+        }
+
+        if(entity_list) {
+            res = tfm_ner.extract_entity(utterance);
+
+            //prepare a standard way of organizing extracted entities inside of the walker
+            //this can be modified if we swap out the NER without altering dependencies in the implementing app
+            if(res.type == list || res.type == dict) {
+                for entity in res {
+                    if(entity["conf_score"] >= global.min_ner_confidence) {
+                        entity_label = entity["entity_value"];
+                        entity_text = entity["entity_text"];
+                        entity_confidence = entity["conf_score"];
+                        
+                        if(entity_label in entity_list) { 
+                            //only consider valid entities based on entity_list.json
+                            //update the collection of entities in the walker, 
+                            //appending new entity_texts to existing entity_labels
+                            if(entity_label not in entities) {
+                                entities[entity_label] = [{"text": entity_text, "confidence":entity_confidence}];
+                            } else {
+                                texts = entities[entity_label];
+
+                                for item in texts {   
+                                    if(entity_text not in item["text"]) {
+                                        entities[entity_label] += [{"text":entity_text, "confidence":entity_confidence}]; 
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }      
+
+    }
+
+    ::extract_entities;
+}
+
+walker apply_tag_filter {
+    has query;
+    has entities;
+
+    has min_confidence = 0.15;
+    can use.qa_similarity;
+
+    entities = spawn here walker::query_entities(utterance=query);
+
+    root: take -->[0];
+    app_root {
+        if ("tag" in entities.dict::keys): take --> node::tags;
+        else: take --> node::posts;
+    }
+    
+    tags {
+        for extracted_tag in entities["tag"] {
+            std.log("extracted tag: "+extracted_tag["text"]);
+            take --> node::tag(label == extracted_tag["text"]);
+        }
+    }
+
+    tag {
+        // cos_score = use.qa_similarity(text1 = here.label, text2 = entities["tag"][0]["text"]);
+        // std.log("tag '"+here.label+"' has confidence:"+cos_score.str);
+        // if (cos_score >= 0.15) {
+        //     take -[tag_post]-> node::post;
+        // }
+
+        std.log(here.label + "has" + (-[tag_post]->.length) + "posts");
+        take -[tag_post]-> node::post;
+    }
+
+    post {
+        report here;
+    }
+}
+
+walker ner_search {
+    has query;
+    std.log("extracted entities: "+ entities);
+    
+}
