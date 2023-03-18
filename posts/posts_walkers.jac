@@ -412,6 +412,30 @@ walker query_entities {
     ::extract_entities;
 }
 
+// gets a similar tag related to the extracted tag
+walker get_similar_tag {
+    has extracted_tag;
+    has entities;
+
+    take --> node::tag;
+
+    tag {
+        std.log("examining tag: "+here.label);
+
+        cos_score = use.qa_similarity(text1 = here.label, text2 = extracted_tag);
+
+        if (cos_score >= 0.15) {
+            std.log("grabbing posts connected to: "+ here.label);
+            take -[tag_post]-> node::post;
+        }
+
+    }
+
+    post {
+        spawn here walker::apply_post_filter(entities=entities);
+    }
+}
+
 walker apply_tag_filter {
     has query;
     has entities;
@@ -423,35 +447,57 @@ walker apply_tag_filter {
 
     root: take -->[0];
     app_root {
+        // if tag is extracted, go to tags node; else go to posts node
         if ("tag" in entities.dict::keys): take --> node::tags;
         else: take --> node::posts;
     }
-    
-    tags {
+
+    tags {  // while on tags node...
+        tag_labels = -->.label;
         for extracted_tag in entities["tag"] {
             std.log("extracted tag: "+extracted_tag["text"]);
-            take --> node::tag(label == extracted_tag["text"]);
+            // if extracted tag matches the label of any tag then go to that tag node
+            if (extracted_tag["text"] in tag_labels){
+                take --> node::tag(label == extracted_tag["text"]);
+            }
+            // else spawan walker to get a similar tag
+            else {
+                std.log("looking for a similar tag related to: "+extracted_tag["text"]);
+                spawn here walker::get_similar_tag(extracted_tag=extracted_tag["text"], entities=entities);
+            }
         }
+        
     }
 
-    tag {
-        // cos_score = use.qa_similarity(text1 = here.label, text2 = entities["tag"][0]["text"]);
-        // std.log("tag '"+here.label+"' has confidence:"+cos_score.str);
-        // if (cos_score >= 0.15) {
-        //     take -[tag_post]-> node::post;
-        // }
+    posts {
+        take --> node::post;
+    }
 
-        std.log(here.label + "has" + (-[tag_post]->.length) + "posts");
-        take -[tag_post]-> node::post;
+    tag { // while on tag node go to every post connected to this tag
+        std.log("getting posts connected to "+here.label+" tag node");
+        take --> node::post;
+        // report -->;
     }
 
     post {
-        report here;
+        // report here;
+        spawn here walker::apply_post_filter(entities=entities);
     }
 }
 
-walker ner_search {
-    has query;
-    std.log("extracted entities: "+ entities);
-    
+walker apply_post_filter {
+    has entities;
+
+    post {
+        // report entities;
+        if ("news_source" in entities.dict::keys) {
+            for extracted_source in entities["news_source"] {
+                std.log("extracted news source: "+extracted_source["text"]);
+                // if extracted tag matches the label of any tag then go to that tag node
+                if (extracted_source["text"] == (here.source).str::lower){
+                    report here;
+                }
+            }
+        }
+    }
 }
