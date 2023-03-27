@@ -13,5 +13,3 @@ node post {
 edge posts_post {
     has id;
 }
-
-edge related;

@@ -17,7 +17,7 @@ walker create_tag {
         }
 
         // creates tag node
-        nd = spawn node::tag(label = label.str::lower);
+        nd = spawn node::tag(label = label);
         // connect it to tags branch node
         here ++> nd;
 
@@ -42,7 +42,7 @@ walker update_tag {
     has label;
 
     tag {
-        if(label): here.label = label.str::lower;
+        if(label): here.label = label;
         report here;
         disengage;
     }
@@ -162,7 +162,7 @@ walker import_tag_data {
             for tag_label in tag_data.dict::keys {
 
                 // creates tag with content from JSON
-                nd = spawn node::tag(label = tag_label.str::lower);
+                nd = spawn node::tag(label = tag_label);
 
                 // connect the new tag node to the tags node that we're currently on
                 here ++> nd;

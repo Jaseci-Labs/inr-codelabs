@@ -4,8 +4,6 @@ walker tfm_ner_train_model {
     has model_path = global.tfm_ner_model_output_path;
     has num_train_epochs = 100;
     has mode = "incremental"; // default, incremental
-    can tfm_ner.save_model;
-    can tfm_ner.load_model;
 
     root {
         take --> node::tfm_ner else{
@@ -14,10 +12,6 @@ walker tfm_ner_train_model {
         }
     }
     tfm_ner: here::train;
-
-    //save and load after training
-    // tfm_ner.save_model(model_path=model_path);
-    // tfm_ner.load_model(model_path=model_path);
 
 }
 

@@ -1,4 +1,5 @@
 import {*} with "./globals.jac";
+
 import {*} with "./graph.jac";
 import {*} with "./posts/posts_walkers.jac";
 import {*} with "./tags/tags_walkers.jac";

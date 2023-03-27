@@ -220,9 +220,9 @@ walker apply_tags {
         // if it makes our acceptance confidence level, we consider it
         if (confidence >= min_confidence) {
 
-            // establish the edge, if it doesn't exist
-            _post <+[tag_post(confidence = confidence)]+> here;
-            std.log("added tag" + here.label);
+            //establish the edge, if it doesnt exist
+            if( _post in <-[tag_post]-> ): std.log("already added tag " + here.label);
+            else: _post <+[tag_post(confidence = confidence)]+> here;
 
         } else {
             std.log("confidence too low, skipping");
@@ -260,109 +260,7 @@ walker semantic_search {
  
 }
 
-// generates the embeddings for an array of text
-walker umap_cluster {
-    can use.encode;
-    can cluster.get_umap;
-
-    has list_of_text;
-    has anchor embeddings;
-
-    embeddings = cluster.get_umap(use.encode(list_of_text),15, 0.1, 2, 42);
-}
-
-// allows you to generate hbdscan clusters based on the umap embeddings
-walker hbdscan_clusterings {
-    can cluster.get_cluster_labels;
-    can cluster.get_umap;
-    can use.encode;
-
-    has umap_embeddings;
-    has anchor clusters;
-
-    clusters = cluster.get_cluster_labels(umap_embeddings,"hbdscan",2,2); 
-}
-
-// allows you to generate kmeans clusters based on the umap embeddings
-walker kmean_clusterings {
-    can cluster.get_umap;
-    can use.encode;
-
-    has umap_embeddings;
-    has anchor clusters;
-
-    clusters = cluster.get_cluster_labels(umap_embeddings,"kmeans",2,2, n_clusters);
-}
-
-// connects related posts
-walker get_clusters {
-    has clusters;
-    has cluster_method = "hbdscan";
-    has n_clusters = 3;
-
-    can inr.zip_list, inr.get_cluster_list;
-
-    root: take -->[0];
-    app_root: take --> node::posts;
-    posts{ // while on posts node ...
-        if((-[posts_post]->).length > 0){   // check if there is post
-            list_of_summary = -[posts_post]->.summary; // plucks a list of summary values fom nodes
-            // getting a list of post node jid
-            posts_jid = -[posts_post]->.edge.id;
-            // creates a list of embeddings using posts summary
-            umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_summary);
-            // generates hbd clusters based on umap embeddings
-            if (cluster_method == "hbdscan") {
-                hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
-                clusters = inr.zip_list(d_keys=posts_jid, d_values=hdb_data);
-            }
-            // generates kmeans clusters based on umap embeddings
-            elif (cluster_method == "kmean"){
-                kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
-                clusters = inr.zip_list(d_keys=posts_jid, d_values=kmean_data);
-            }
-            else{
-                report "cluster_method must be either 'hbdscan' or 'kmean'.";
-                disengage;
-            }
-            std.log(clusters);
-            take -->;
-        } 
-        else { // if no post exist...
-            report "No posts found! Please create or import a post.";
-            disengage;
-        }
-    }
-    post {
-        std.log("examining posts related to: "+here.title);
-        // grabs list of jids related to this post 
-        related_jid = inr.get_cluster_list(item=here.info['jid'], clusters=clusters);
-        if (related_jid.length > 0) {
-            for i in related_jid {
-                if( *i in (-[related]->)) {
-                    std.log("already connected to: "+ i);
-                }
-                else {
-                    here <+[related]+>*i;
-                    std.log("connecting to: "+ i);
-                }
-            }
-        }
-        else {
-            std.log("no post related to "+here.title);
-        }
-    }
-
-}
-
-walker get_related_posts {
-    post {
-        report -[related]-> node::post;
-    }
-}
-
-// extract entities from query inputted by user
-walker query_entities {
+walker entity_search {
     has utterance;
     has anchor entities = {};
 
@@ -408,96 +306,7 @@ walker query_entities {
         }      
 
     }
-
     ::extract_entities;
-}
 
-// gets a similar tag related to the extracted tag
-walker get_similar_tag {
-    has extracted_tag;
-    has entities;
-
-    take --> node::tag;
-
-    tag {
-        std.log("examining tag: "+here.label);
-
-        cos_score = use.qa_similarity(text1 = here.label, text2 = extracted_tag);
-
-        if (cos_score >= 0.15) {
-            std.log("grabbing posts connected to: "+ here.label);
-            take -[tag_post]-> node::post;
-        }
-
-    }
-
-    post {
-        spawn here walker::apply_post_filter(entities=entities);
-    }
-}
-
-walker apply_tag_filter {
-    has query;
-    has entities;
-
-    has min_confidence = 0.15;
-    can use.qa_similarity;
-
-    entities = spawn here walker::query_entities(utterance=query);
-
-    root: take -->[0];
-    app_root {
-        // if tag is extracted, go to tags node; else go to posts node
-        if ("tag" in entities.dict::keys): take --> node::tags;
-        else: take --> node::posts;
-    }
-
-    tags {  // while on tags node...
-        tag_labels = -->.label;
-        for extracted_tag in entities["tag"] {
-            std.log("extracted tag: "+extracted_tag["text"]);
-            // if extracted tag matches the label of any tag then go to that tag node
-            if (extracted_tag["text"] in tag_labels){
-                take --> node::tag(label == extracted_tag["text"]);
-            }
-            // else spawan walker to get a similar tag
-            else {
-                std.log("looking for a similar tag related to: "+extracted_tag["text"]);
-                spawn here walker::get_similar_tag(extracted_tag=extracted_tag["text"], entities=entities);
-            }
-        }
-        
-    }
-
-    posts {
-        take --> node::post;
-    }
-
-    tag { // while on tag node go to every post connected to this tag
-        std.log("getting posts connected to "+here.label+" tag node");
-        take --> node::post;
-        // report -->;
-    }
-
-    post {
-        // report here;
-        spawn here walker::apply_post_filter(entities=entities);
-    }
-}
-
-walker apply_post_filter {
-    has entities;
-
-    post {
-        // report entities;
-        if ("news_source" in entities.dict::keys) {
-            for extracted_source in entities["news_source"] {
-                std.log("extracted news source: "+extracted_source["text"]);
-                // if extracted tag matches the label of any tag then go to that tag node
-                if (extracted_source["text"] == (here.source).str::lower){
-                    report here;
-                }
-            }
-        }
-    }
+    report entities;
 }
