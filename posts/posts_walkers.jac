@@ -220,9 +220,9 @@ walker apply_tags {
         // if it makes our acceptance confidence level, we consider it
         if (confidence >= min_confidence) {
 
-            // establish the edge, if it doesn't exist
-            _post <+[tag_post(confidence = confidence)]+> here;
-            std.log("added tag" + here.label);
+            //establish the edge, if it doesnt exist
+            if( _post in <-[tag_post]-> ): std.log("already added tag " + here.label);
+            else: _post <+[tag_post(confidence = confidence)]+> here;
 
         } else {
             std.log("confidence too low, skipping");
