@@ -259,3 +259,54 @@ walker semantic_search {
     }
  
 }
+
+walker entity_search {
+    has utterance;
+    has anchor entities = {};
+
+    can extract_entities {
+        
+        try {
+            entity_list = file.load_json(global.entity_list);
+        } else {
+            std.log("Could not load entity list.");
+        }
+
+        if(entity_list) {
+            res = tfm_ner.extract_entity(utterance);
+
+            //prepare a standard way of organizing extracted entities inside of the walker
+            //this can be modified if we swap out the NER without altering dependencies in the implementing app
+            if(res.type == list || res.type == dict) {
+                for entity in res {
+                    if(entity["conf_score"] >= global.min_ner_confidence) {
+                        entity_label = entity["entity_value"];
+                        entity_text = entity["entity_text"];
+                        entity_confidence = entity["conf_score"];
+                        
+                        if(entity_label in entity_list) { 
+                            //only consider valid entities based on entity_list.json
+                            //update the collection of entities in the walker, 
+                            //appending new entity_texts to existing entity_labels
+                            if(entity_label not in entities) {
+                                entities[entity_label] = [{"text": entity_text, "confidence":entity_confidence}];
+                            } else {
+                                texts = entities[entity_label];
+
+                                for item in texts {   
+                                    if(entity_text not in item["text"]) {
+                                        entities[entity_label] += [{"text":entity_text, "confidence":entity_confidence}]; 
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }      
+
+    }
+    ::extract_entities;
+
+    report entities;
+}
