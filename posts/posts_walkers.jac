@@ -312,3 +312,77 @@ walker entity_search {
     ::extract_entities;
     report spawn net.root() walker::filter_posts_by_entities(entities = entities);
 }
+
+walker filter_posts_by_entities {
+    has entities;
+    has anchor _posts = [];
+
+    has min_confidence = 0.15;
+    can use.qa_similarity;
+
+    if(entities) {
+        root: take -->[0];
+        app_root {
+            // if tag is extracted, go to tags node; else go to posts node
+            if ("tag" in entities.dict::keys): take --> node::tags;
+            else: take --> node::posts;
+        }
+
+        tags {  // while on tags node...
+            tag_labels = -->.label;
+            for extracted_tag in entities["tag"] {
+                std.log("extracted tag: "+extracted_tag["text"]);
+                // if extracted tag matches the label of any tag then go to that tag node
+                if (extracted_tag["text"] in tag_labels){
+                    take --> node::tag(label == extracted_tag["text"]);
+                }
+                // else spawan walker to get a similar tag
+                else {
+                    std.log("looking for a similar tag related to: "+extracted_tag["text"]);
+                    similar_tag = spawn here walker::get_similar_tag(extracted_tag=extracted_tag["text"], entities=entities);
+                    if(similar_tag) {
+                        std.log("found similar tag: "+ similar_tag +" to:"+ extracted_tag["text"]);
+                        take --> node::tag(label == similar_tag);
+                    }
+                }
+            }
+            
+        }
+
+        posts {
+            take --> node::post;
+        }
+
+        tag { // while on tag node go to every post connected to this tag
+            std.log("getting posts connected to "+here.label+" tag node");
+            take <-[tag_post]-> node::post;
+        }
+
+        post {
+            // if we're here, we've found a narrowed-down post, let's add it
+            _posts += spawn here walker::apply_post_filter(entities=entities);
+        }
+    }
+}
+
+// gets a similar tag related to the extracted tag
+walker get_similar_tag {
+    has extracted_tag;
+    has entities;
+    has anchor similar_tag;
+
+    min_score = 0.15;
+
+    take --> node::tag;
+
+    tag {
+        std.log("examining tag: "+here.label);
+
+        cos_score = use.qa_similarity(text1 = here.label, text2 = extracted_tag);
+
+        if (cos_score >= min_score) {
+            similar_tag = here.label;
+        }
+    }
+}
+
