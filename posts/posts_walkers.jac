@@ -386,3 +386,66 @@ walker get_similar_tag {
     }
 }
 
+walker apply_post_filter {
+    can inr.phrase_to_date;
+    has entities;
+    has anchor _posts = [];
+
+    post {
+
+        entity_labels = entities.dict::keys;
+
+        std.log("checking post: "+here.title);
+
+        // checking for news source, timestamp_start, timestamp_end
+        if ("news_source" in entity_labels and "timestamp_start" in entity_labels and "timestamp_end" in entity_labels) {
+            start_date = inr.phrase_to_date(entities["timestamp_start"][0]["text"]);
+            end_date = inr.phrase_to_date(entities["timestamp_end"][0]["text"]);
+            for news_source in entities["news_source"] {
+                if (news_source["text"] == (here.source).str::lower
+                    and (date.date_day_diff(start_date, here.published) >= 0) 
+                    and (date.date_day_diff(here.published, end_date) >= 0)){
+                    _posts += [here];
+                }
+            }
+        }
+        // checking for news source, timestamp
+        elif ("news_source" in entity_labels and "timestamp" in entity_labels) {
+            date_published = inr.phrase_to_date(entities["timestamp"][0]["text"]);
+            for news_source in entities["news_source"] {
+                if (news_source["text"] == (here.source).str::lower and date_published in here.published){
+                    _posts += [here];
+                }
+            }
+        }
+        // checking for timestamp_start, timestamp_end
+        elif ("timestamp_start" in entity_labels and "timestamp_end" in entity_labels) {
+            start_date = inr.phrase_to_date(entities["timestamp_start"][0]["text"]);
+            end_date = inr.phrase_to_date(entities["timestamp_end"][0]["text"]);
+            if ( (date.date_day_diff(start_date, here.published) >= 0) 
+            and (date.date_day_diff(here.published, end_date) >= 0)){
+                _posts += [here];
+            }
+        }
+        // checking for timestamp only
+        elif ("timestamp" in entity_labels) {
+            date_published = inr.phrase_to_date(entities["timestamp"][0]["text"]);
+            std.log(date_published);
+            if ( (date.date_day_diff(date_published, here.published) >= 0)) {
+                _posts += [here];
+            }
+        }
+        // checking for news_source only
+        elif ("news_source" in entities.dict::keys) {
+            for extracted_source in entities["news_source"] {
+                std.log("extracted news source: "+extracted_source["text"]);
+                if (extracted_source["text"] == (here.source).str::lower){
+                    _posts += [here];
+                }
+            }
+        }
+        else {
+            _posts += [here];
+        }
+    }
+}
