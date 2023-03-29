@@ -260,9 +260,10 @@ walker semantic_search {
  
 }
 
+// extract entities from query inputted by user
 walker entity_search {
     has utterance;
-    has anchor entities = {};
+    has entities = {};
 
     can extract_entities {
         
@@ -306,7 +307,8 @@ walker entity_search {
         }      
 
     }
-    ::extract_entities;
 
-    report entities;
+    // extract entities then we filter posts and report
+    ::extract_entities;
+    report spawn net.root() walker::filter_posts_by_entities(entities = entities);
 }
