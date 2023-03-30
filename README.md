@@ -26,6 +26,9 @@ If you encountered an error while trying to install package - sentencepiece, the
 Now, try running `pip install jac_nlp[all]` again.
 
 
+`pip install jac_misc[cluster]`
+
+
 Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
 
 `jsserv makemigrations base`
@@ -69,6 +72,10 @@ After logging in, we'll need to load the modules:
 `actions load local inr_actions.py`
 
 `actions load module jac_nlp.use_qa`
+
+`actions load module jac_nlp.use_enc`
+
+`actions load module jac_misc.cluster`
 
 This might take a while, especially if you're running it for the first time.
 
@@ -428,6 +435,64 @@ This walker:
 {
     "name": "semantic_search",
     "ctx": {"query": "What's the latest in the oil and gas industry in Guyana?"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker get_clusters
+
+You'll need to run __walker summarize_posts__ at least once before running this request.
+
+The default cluster_method is hbdscan:
+
+``` JSON
+{
+    "name": "get_clusters",
+    "ctx": {},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+``` JSON
+{
+    "name": "get_clusters",
+    "ctx": {"cluster_method": "hbdscan"},
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+``` JSON
+{
+    "name": "get_clusters",
+    "ctx": {
+        "cluster_method": "kmean",
+        "n_clusters": 5
+        },
+    "_req_ctx": {},
+    "snt": "my_sentinel_id",
+    "profiling": false,
+    "is_async": false
+}
+```
+
+## walker get_related_posts
+
+You'll need to run __walker get_clusters__ at least once before running this request.
+
+``` JSON
+{
+    "name": "get_related_posts",
+    "nd": "urn:uuid:7d570cbe-5cb1-428f-9d96-5ced04bce499",
+    "ctx": {},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
     "profiling": false,
