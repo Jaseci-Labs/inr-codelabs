@@ -1,25 +1,43 @@
-# How to run this project on localhost
-
-In your current working directory (Intelligent News Reader folder):
-
-Open a new WSL terminal. We'll refer to this as __*WSL T1*__.
-
-
-Before you begin running any JAC program, always remember to install or update your current version of jaseci. You can do this by running the following commands in __*WSL T1*__:
+Before you begin running any JAC program, always remember to install or update your current version of jaseci. You can do this by running the following commands:
 
 `pip3 install jaseci` or `pip3 install jaseci --upgrade`
 
 `pip3 install jaseci-serv` or `pip3 install jaseci-serv --upgrade`
 
-Next, run the following 2 commands to create mydatabase file. This is only necessary if the mydatabase file is not already in the current folder.
+
+# Codelab-1
+
+## Summary
+
+* Skeleton of the app will be built out;
+* advised folder structure, naming conventions will be conveyed; 
+* sample news post dataset will be provided in the form of JSON file; 
+* Code thru objective will be to step through building: 
+    * the graph structure to organize the news post data,
+    * the walker which imports the data and spawns the graph
+    * other walkers which provide complementing CRUD operations on graph data
+* Interacting with your JAC app via the API will be covered
+* Jaseci Studio will be introduced to visualize the imported graph data in the Jaseci graph.
+
+
+## Build and Test it!
+
+The first objective here is to get the jaseci-serv running. To do this, you'll run the following commands: 
 
 `jsserv makemigrations base`
 
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_make_migrations.png?raw=true)
+
+
 `jsserv migrate`
 
-Now, we will start the server on port 8000:
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_jsserv_migrate.png?raw=true)
+
 
 `jsserv runserver 0.0.0.0:8000`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_runserver.png?raw=true)
+
 
 Go to localhost:8000/docs/
 
