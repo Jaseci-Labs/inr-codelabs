@@ -95,13 +95,13 @@ Download and install the latest version of the [Jaseci Studio](https://github.co
 
 Once Jaseci Studio is running, you'll need to enter host, port, email and password (for the superuser) and then click 'Test Connection'. If it's successful, you can click 'Connect'.
 
-![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/jaseci_studio_login.png?raw=true)
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_jaseci_studio_login.png?raw=true)
 
 Once connected, on the left navigation menu, click on the icon that looks like a graph.
 
 You should see the graph with the root node and app_root node. Click on app_root node, followed by the 'Expand Recursively' button to see the posts node.
 
-![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/jaseci_graph.png?raw=true)
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_jaseci_graph.png?raw=true)
 
 
 ## Rebuilding and updating sentinel
@@ -115,6 +115,32 @@ Everytime a change is made to the code, you must run the following two commands:
 `sentinel set -snt active:sentinel -mode ir main.jir`
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_updating_sentinel.png?raw=true)
+
+
+## Execute import_news_data walker
+
+This walker:
+- deletes the existing post nodes from the graph, if any.
+- creates the posts nodes using data from the JSON file.
+
+To run this walker, enter the following command in the jaseci terminal: 
+
+`walker run import_news_data -ctx "{\"file_path\": \"news_posts.json\" }"`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_execute_import_newsdata.png?raw=true)
+
+You should get a similar result like this: 
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_import_newsdata_result.png?raw=true)
+
+
+## Updated Graph
+
+Now, let's see the updated graph: 
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_updated_graph_1.png?raw=true)
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_updated_graph_2.png?raw=true)
 
 
 
