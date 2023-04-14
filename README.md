@@ -73,7 +73,7 @@ Next, you'll login to the server:
 
 Enter username and password of superuser created above.
 
-If login successful, a token should be generated. We'll refer to this as ***my_token***. This will be needed to make requests to the API via Postman. See the [Postman section](## In postman "Go to Postman section") below for more information.
+If login successful, a token should be generated. We'll refer to this as ***my_token***. This will be needed to make requests to the API via Postman. See the [Postman section](##Postman "Go to Postman section") below for more information.
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_jsctl_login.png?raw=true)
 
@@ -144,7 +144,15 @@ Now, let's see the updated graph:
 
 
 
-## In postman
+## Postman
+
+You can also execute the walkers via Postman.
+
+Download and install the latest version of the [Postman](https://www.postman.com/downloads/) application, based on your Operating System.
+
+Once Postman is running, create a request.
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_create_request.png?raw=true)
 
 Create a new request:
 
