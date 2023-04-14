@@ -62,7 +62,7 @@ This will start the jaseci shell, which will be used to login to the server.
 
 Once you have the jaseci shell running, run the command:
 
-`jsctl jac build main.jac`
+`jac build main.jac`
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_build.png?raw=true)
 
@@ -73,7 +73,7 @@ Next, you'll login to the server:
 
 Enter username and password of superuser created above.
 
-If login successful, a token should be generated. We'll refer to this as ***my_token***. This will be needed to make requests to the API via Postman. See the [Postman section](##In postman "Go to Postman section") below for more information.
+If login successful, a token should be generated. We'll refer to this as ***my_token***. This will be needed to make requests to the API via Postman. See the [Postman section](## In postman "Go to Postman section") below for more information.
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_jsctl_login.png?raw=true)
 
@@ -108,7 +108,7 @@ You should see the graph with the root node and app_root node. Click on app_root
 
 Everytime a change is made to the code, you must run the following two commands: 
 
-`jsctl jac build main.jac`
+`jac build main.jac`
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_rebuild.png?raw=true)
 
