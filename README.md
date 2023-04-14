@@ -73,7 +73,7 @@ Next, you'll login to the server:
 
 Enter username and password of superuser created above.
 
-If login successful, a token should be generated. We'll refer to this as ***my_token***. This will be needed to make requests to the API via Postman. See the [Postman section](##Postman "Go to Postman section") below for more information.
+If login successful, a token should be generated. We'll refer to this as ***my_token***. This will be needed to make requests to the API via Postman. See the [Postman section](#Postman "Go to Postman section") below for more information.
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_jsctl_login.png?raw=true)
 
