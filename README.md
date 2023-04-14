@@ -34,60 +34,88 @@ The first objective here is to get the jaseci-serv running. To do this, you'll r
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_jsserv_migrate.png?raw=true)
 
 
-`jsserv runserver 0.0.0.0:8000`
+In django, it's going to set up the necessary structures to run your JAC application.
 
-![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_runserver.png?raw=true)
+Once that is set up, we need to create the superuser for your JAC application.
 
-
-Go to localhost:8000/docs/
-
-You should be able to see Jaseci API Docs
-
-
-Open another WSL terminal. We'll refer to this as __*WSL T2*__.
-
-In __*WSL T2*__:
-
-First, we'll need to create a superuser
+Run the following command:
 
 `jsserv createsuperuser`
 
-Enter email
+Enter your email and password as prompted.
 
-Enter password (twice)
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_createsuperuser.png?raw=true)
 
-Then, login to localhost.
+Once the superuser is created, you can run your server: 
 
-`jsctl -m`
+`jsserv runserver`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_runserver.png?raw=true)
+
+Note: When the server is running, you should leave that terminal alone. Any other commands, should be executed in another terminal. 
+
+In a new terminal, run `jsctl -m` 
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_start_jsctl.png?raw=true)
+
+This will start the jaseci shell, which will be used to login to the server.
+
+Once you have the jaseci shell running, run the command:
+
+`jsctl jac build main.jac`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_build.png?raw=true)
+
+
+Next, you'll login to the server: 
 
 `login http://localhost:8000`
 
 Enter username and password of superuser created above.
-If login successful, a token should be generated. We'll refer to this as ***my_token***.
 
-Open another WSL terminal. We'll refer to this as __*WSL T3*__.
+If login successful, a token should be generated. We'll refer to this as ***my_token***. This will be needed to make requests to the API via Postman. See the [Postman section](##In postman "Go to Postman section") below for more information.
 
-In __*WSL T3*__:
-
-`jsctl jac build main.jac`
-
-Note: You must run this command, every time a change is made to your code.
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_jsctl_login.png?raw=true)
 
 
-In __*WSL T2*__:
+Now, you are reaady to register the sentinel: 
 
 `sentinel register -name main -mode ir main.jir`
 
-`alias list`
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_register_sentinel.png?raw=true)
 
-We'll refer to the active:sentinel as ***my_sentinel_id***
+Note: sentinel register should only be executed once. sentinel set should be used for every subsequent change and recompilation.
+
+We'll refer to the sentinel's jid as ***my_sentinel_id***. This will also be needed to make requests to the API via Postman.
 
 
-If you have already registered the sentinel, then just run:
+## Visualizing the graph using Jaseci Studio
+
+Download and install the latest version of the [Jaseci Studio](https://github.com/Jaseci-Labs/jaseci/releases) application, based on your Operating System.
+
+Once Jaseci Studio is running, you'll need to enter host, port, email and password (for the superuser) and then click 'Test Connection'. If it's successful, you can click 'Connect'.
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/jaseci_studio_login.png?raw=true)
+
+Once connected, on the left navigation menu, click on the icon that looks like a graph.
+
+You should see the graph with the root node and app_root node. Click on app_root node, followed by the 'Expand Recursively' button to see the posts node.
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/jaseci_graph.png?raw=true)
+
+
+## Rebuilding and updating sentinel
+
+Everytime a change is made to the code, you must run the following two commands: 
+
+`jsctl jac build main.jac`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_rebuild.png?raw=true)
 
 `sentinel set -snt active:sentinel -mode ir main.jir`
 
-You'll need to run this command after you build.
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_updating_sentinel.png?raw=true)
+
 
 
 ## In postman
