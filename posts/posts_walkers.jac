@@ -191,7 +191,7 @@ walker apply_tags {
     has min_confidence = 0.1;
     has _post;
 
-    root: take -->[0];
+    root: take --> node::app_root;
     app_root: take --> node::tags;
 
     post {
@@ -221,7 +221,7 @@ walker apply_tags {
         if (confidence >= min_confidence) {
 
             //establish the edge, if it doesnt exist
-            if( _post in <-[tag_post]-> ): std.log("already added tag " + here.label);
+            if( _post in <-[tag_post]-> ): std.log("already added tag: " + here.label);
             else: _post <+[tag_post(confidence = confidence)]+> here;
 
         } else {
@@ -237,7 +237,7 @@ walker semantic_search {
 
     can use.qa_similarity;
 
-    root: take -->[0];
+    root: take --> node::app_root;
     app_root: take --> node::posts;
 
     posts {
@@ -268,13 +268,13 @@ walker entity_search {
     can extract_entities {
         
         try {
-            entity_list = file.load_json(global.entity_list);
+            entity_config = file.load_json(global.entity_config);
         } else {
             std.log("Could not load entity list.");
         }
 
-        if(entity_list) {
-            res = tfm_ner.extract_entity(utterance);
+        if(entity_config) {
+            res = tfm_ner.extract_entity(visitor.utterance);
 
             //prepare a standard way of organizing extracted entities inside of the walker
             //this can be modified if we swap out the NER without altering dependencies in the implementing app
@@ -284,9 +284,9 @@ walker entity_search {
                         entity_label = entity["entity_value"];
                         entity_text = entity["entity_text"];
                         entity_confidence = entity["conf_score"];
-                        
-                        if(entity_label in entity_list) { 
-                            //only consider valid entities based on entity_list.json
+                                                
+                        if(entity_label in entity_config["labels"]) { 
+                            //only consider valid entities based on entity_config.json
                             //update the collection of entities in the walker, 
                             //appending new entity_texts to existing entity_labels
                             if(entity_label not in entities) {
@@ -450,102 +450,133 @@ walker apply_post_filter {
     }
 }
 
-// generates the embeddings for an array of text
-walker umap_cluster {
+// does dimensionality reduction after 512 dimension embeddings are produced
+
+walker do_umap {
     can use.encode;
     can cluster.get_umap;
-
+    
     has list_of_text;
     has anchor embeddings;
-
+    
+    //params: embeddings, neighbors, min_dist, n_components, metric
+    //read more here: https://umap-learn.readthedocs.io/en/latest/parameters.html
+    
     embeddings = cluster.get_umap(use.encode(list_of_text),15, 0.1, 2, 42);
+
 }
 
 // allows you to generate hbdscan clusters based on the umap embeddings
-walker hbdscan_clusterings {
-    can cluster.get_cluster_labels;
-    can cluster.get_umap;
-    can use.encode;
 
+walker get_hdbscan_clusters {
     has umap_embeddings;
+    
+    can cluster.get_cluster_labels;
+    can use.encode;
+    
     has anchor clusters;
+    
+    clusters = cluster.get_cluster_labels(umap_embeddings,"hbdscan",2,2);
 
-    clusters = cluster.get_cluster_labels(umap_embeddings,"hbdscan",2,2); 
 }
 
 // allows you to generate kmeans clusters based on the umap embeddings
-walker kmean_clusterings {
-    can cluster.get_umap;
-    can use.encode;
 
+walker get_kmeans_clusters {
     has umap_embeddings;
+    
+    can use.encode;
+    
     has anchor clusters;
-
+    
     clusters = cluster.get_cluster_labels(umap_embeddings,"kmeans",2,2, n_clusters);
+
 }
 
 // connects related posts
-walker get_clusters {
+
+walker relate_posts {
     has clusters;
-    has cluster_method = "hbdscan";
+    has cluster_method = "hdbscan";
     has n_clusters = 3;
-
+    
     can inr.zip_list, inr.get_cluster_list;
-
+    
     root: take -->[0];
     app_root: take --> node::posts;
-    posts{ // while on posts node ...
-        if((-[posts_post]->).length > 0){   // check if there is post
-            list_of_summary = -[posts_post]->.summary; // plucks a list of summary values fom nodes
+
+    posts { // while on posts node ...
+        if((-[posts_post]->).length > 0){ // check if there are posts
+            list_of_summaries = -[posts_post]->.summary; // plucks a list of summary values fom nodes
+            
             // getting a list of post node jid
             posts_jid = -[posts_post]->.edge.id;
+            
             // creates a list of embeddings using posts summary
-            umap_embeddings = spawn here walker::umap_cluster(list_of_text=list_of_summary);
+            umap_embeddings = spawn here walker::do_umap(list_of_text=list_of_summaries);
+            
             // generates hbd clusters based on umap embeddings
-            if (cluster_method == "hbdscan") {
-                hdb_data = spawn here walker::hbdscan_clusterings(umap_embeddings=umap_embeddings);
-                clusters = inr.zip_list(d_keys=posts_jid, d_values=hdb_data);
+            if (cluster_method == "hdbscan") {
+                hdbscan_data = spawn here walker::get_hdbscan_clusters(umap_embeddings=umap_embeddings);
+                clusters = inr.zip_list(d_keys=posts_jid, d_values=hdbscan_data);
             }
+            
             // generates kmeans clusters based on umap embeddings
-            elif (cluster_method == "kmean"){
-                kmean_data = spawn here walker::kmean_clusterings(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
-                clusters = inr.zip_list(d_keys=posts_jid, d_values=kmean_data);
+            elif (cluster_method == "kmeans"){
+                kmeans_data = spawn here walker::get_kmeans_clusters(umap_embeddings=umap_embeddings, n_clusters=n_clusters);
+                clusters = inr.zip_list(d_keys=posts_jid, d_values=kmeans_data);
             }
             else{
-                report "cluster_method must be either 'hbdscan' or 'kmean'.";
+                report "cluster_method must be either 'hdbscan' or 'kmeans'.";
                 disengage;
             }
+            
             std.log(clusters);
             take -->;
-        } 
+        }
         else { // if no post exist...
             report "No posts found! Please create or import a post.";
             disengage;
         }
+
     }
+
     post {
+
         std.log("examining posts related to: "+here.title);
-        // grabs list of jids related to this post 
-        related_jid = inr.get_cluster_list(item=here.info['jid'], clusters=clusters);
-        if (related_jid.length > 0) {
-            for i in related_jid {
+
+        // grabs list of jids related to this post
+        related_jids = inr.get_cluster_list(item=here.info['jid'], clusters=clusters);
+
+        if (related_jids.length > 0) {
+
+            for i in related_jids {
+
                 if( *i in (-[related]->)) {
                     std.log("already connected to: "+ i);
                 }
+                
                 else {
                     here <+[related]+>*i;
                     std.log("connecting to: "+ i);
                 }
+
             }
+
         }
+
         else {
             std.log("no post related to "+here.title);
         }
-    }
 
+    }
 }
 
+
+
+
 walker get_related_posts {
+    
     post {
         report -[related]-> node::post;
     }
