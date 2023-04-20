@@ -154,9 +154,11 @@ Once Postman is running, create a request.
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_create_request.png?raw=true)
 
-Create a new request:
 
 Select method POST
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_method_post.png?raw=true)
+
 
 Enter "http://localhost:8000/js/walker_run" as request URL.
 
@@ -176,102 +178,14 @@ Ensure you put the walker name.
 
 Send the request
 
-# Sending requests
 
-## walker import_news_data
+## Example of sending request through Postman
 
-This walker:
-- deletes all the post nodes from the graph.
-- creates the posts nodes using data from the JSON file.
 
 ``` JSON
 {
     "name": "import_news_data",
     "ctx": {"file_path": "./news_posts.json"},
-    "_req_ctx": {},
-    "snt": "my_sentinel_id",
-    "profiling": false,
-    "is_async": false
-}
-```
-
-## walker create_post
-
-``` JSON
-{
-    "name": "create_post",
-    "ctx": {
-      "title": "Who will benefit from our oil?",
-      "description": "From the publishers desk In July 2019, Kaieteur News conducted an extensive review of 130 oil contracts to better understand the extent to which the Guyana-ExxonMobil deal is fraught with unfair provisions. The findings were alarming. On a daily basis, Kaieteur News will expose these alarming provisions. Today, we start with the provision that speaks ",
-      "source": "Kaieteur News",
-      "link": "https://www.kaieteurnewsonline.com/2020/09/14/who-will-benefit-from-our-oil/",
-      "image": null,
-      "published": "2020-09-14 20:11:19.210464",
-      "code": "gy"
-    },
-    "_req_ctx": {},
-    "snt": "my_sentinel_id",
-    "profiling": false,
-    "is_async": false
-}
-```
-
-## walker update_post
-
-``` JSON
-{
-    "name": "update_post",
-    "nd": "urn:uuid:db0b5d21-1dce-4337-aefd-b64bc028b39f",
-    "ctx": {
-      "title": "Who will benefit from our oil?",
-      "description": "From the publishers desk In July 2019, Kaieteur News conducted an extensive review of 130 oil contracts to better understand the extent to which the Guyana-ExxonMobil deal is fraught with unfair provisions. The findings were alarming. On a daily basis, Kaieteur News will expose these alarming provisions. Today, we start with the provision that speaks ",
-      "source": "Kaieteur News",
-      "link": "https://www.kaieteurnewsonline.com/2020/09/14/who-will-benefit-from-our-oil/",
-      "image": null,
-      "published": "2020-09-14 20:11:19.210464",
-      "code": "gy"
-    },
-    "_req_ctx": {},
-    "snt": "my_sentinel_id",
-    "profiling": false,
-    "is_async": false
-}
-```
-
-## walker delete_post
-
-``` JSON
-{
-    "name": "delete_post",
-    "nd": "urn:uuid:db0b5d21-1dce-4337-aefd-b64bc028b39f",
-    "ctx": {},
-    "_req_ctx": {},
-    "snt": "my_sentinel_id",
-    "profiling": false,
-    "is_async": false
-}
-```
-
-## walker get_post
-
-``` JSON
-{
-    "name": "get_post",
-    "nd": "urn:uuid:8e84b373-3815-43c4-bb33-32cb090cf7c3",
-    "ctx": {},
-    "_req_ctx": {},
-    "snt": "my_sentinel_id",
-    "profiling": false,
-    "is_async": false
-}
-```
-
-## walker list_posts
-
-``` JSON
-{
-    "name": "list_posts",
-    "ctx": {},
     "_req_ctx": {},
     "snt": "my_sentinel_id",
     "profiling": false,
