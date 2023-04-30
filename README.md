@@ -162,21 +162,40 @@ Select method POST
 
 Enter "http://localhost:8000/js/walker_run" as request URL.
 
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_request_url.png?raw=true)
+
 Click on headers tab
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_headers_tab.png?raw=true)
 
 Add Authorization as key
 
-Enter "token ***my_token***" [ensure there is 1 space between token and the token you copied]
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_authorization_key.png?raw=true)
 
-Copy the JSON Example from the docs under js/walker_run or see below for examples on how to make POST requests.
+Enter "token ***my_token***" as authorization value; ensure there is 1 space between token and the token you copied.
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_authorization_value.png?raw=true)
 
 Under body tab in postman, select raw and change type to JSON
 
-Replace "snt" value with ***my_sentinel_id*** [This can be found in WSL T2]
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_body_type_json.png?raw=true)
 
-Ensure you put the walker name.
+Copy and paste the below example in the body.
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_body_example.png?raw=true)
+
+Replace "snt" value with ***my_sentinel_id*** 
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_body_replace_sentinel.png?raw=true)
 
 Send the request
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_send_request.png?raw=true)
+
+
+The result should look like this:
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-1/images/c1_postman_result.png?raw=true)
 
 
 ## Example of sending request through Postman
