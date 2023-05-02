@@ -1,15 +1,13 @@
-# How to run this project on localhost
-
-In your current working directory (Intelligent News Reader folder):
-
-Open a new WSL terminal. We'll refer to this as __*WSL T1*__.
-
-
 Before you begin running any JAC program, always remember to install or update your current version of jaseci. You can do this by running the following commands in __*WSL T1*__:
 
 `pip3 install jaseci` or `pip3 install jaseci --upgrade`
 
 `pip3 install jaseci-serv` or `pip3 install jaseci-serv --upgrade`
+
+## Recording
+
+Here's the recording for codelab-2.1: [Jaseci AI Mentorship Sessions-20230301_113218-Meeting Recording.mp4](https://v75corp-my.sharepoint.com/personal/eldon_marks_v75inc_com/_layouts/15/stream.aspx?id=%2Fpersonal%2Feldon%5Fmarks%5Fv75inc%5Fcom%2FDocuments%2FRecordings%2FJaseci%20AI%20Mentorship%20Sessions%2D20230301%5F113218%2DMeeting%20Recording%2Emp4&ga=1)
+
 
 You'll also need to install the jac_nlp module:
 
