@@ -14,6 +14,10 @@ Before you begin running any JAC program, always remember to install or update y
 * A specialized walker will be built which leverages this model and walks the graph of news items, updating them with summarizations of their content.
 
 
+## Recording
+
+Here's the recording for codelab-2: [Jaseci AI Mentorship Sessions-20230227_113157-Meeting Recording.mp4](https://v75corp-my.sharepoint.com/personal/eldon_marks_v75inc_com/_layouts/15/stream.aspx?id=%2Fpersonal%2Feldon%5Fmarks%5Fv75inc%5Fcom%2FDocuments%2FRecordings%2FJaseci%20AI%20Mentorship%20Sessions%2D20230227%5F113157%2DMeeting%20Recording%2Emp4&ga=1)
+
 
 ## Install NLP modules
 
