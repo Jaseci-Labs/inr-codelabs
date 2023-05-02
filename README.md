@@ -19,6 +19,10 @@ Before you begin running any JAC program, always remember to install or update y
 * Interacting with your JAC app via the API will be covered
 * Jaseci Studio will be introduced to visualize the imported graph data in the Jaseci graph.
 
+## Recording
+
+Here's the recording for codelab-1: [Jaseci AI Mentorship Sessions-20230220_113750-Meeting Recording.mp4](https://v75corp-my.sharepoint.com/personal/eldon_marks_v75inc_com/_layouts/15/stream.aspx?id=%2Fpersonal%2Feldon%5Fmarks%5Fv75inc%5Fcom%2FDocuments%2FRecordings%2FJaseci%20AI%20Mentorship%20Sessions%2D20230220%5F113750%2DMeeting%20Recording%2Emp4&ga=1)
+
 
 ## Build and Test it!
 
