@@ -64,6 +64,8 @@ You'll need to run this command after you build.
 
 ## Execute import_news_data walker, again
 
+We'll need to run import_news_data walker again, because the current graph doesn't have the summary attribute in post and as such, it will give an error. 
+
 To run this walker, enter the following command in the jaseci terminal: 
 
 `walker run import_news_data -ctx "{\"file_path\": \"news_posts.json\" }"`
