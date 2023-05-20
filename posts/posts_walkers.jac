@@ -237,7 +237,7 @@ walker semantic_search {
 
     can use.qa_similarity;
 
-    root: take -->[0];
+    root: take --> node::app_root;
     app_root: take --> node::posts;
 
     posts {
