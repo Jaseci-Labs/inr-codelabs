@@ -172,7 +172,7 @@ walker summarize_posts {
 // for each post, identify which tags are applicable and establish edges between them
 walker tag_posts {
 
-    root: take -->[0];
+    root: take --> node::app_root;
     app_root: take --> node::posts;
 
     posts {
