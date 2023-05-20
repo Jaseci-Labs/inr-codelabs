@@ -13,4 +13,4 @@ Before you begin running any JAC program, always remember to install or update y
 
 ## Recording
 
-Here's the recording for codelab-5.1: [Jaseci AI Mentorship Sessions-20230313_113346-Meeting Recording.mp4](https://v75corp-my.sharepoint.com)
+Here's the recording for codelab-5.1: [Jaseci AI Mentorship Sessions-20230320_153331-Meeting Recording.mp4](https://v75corp-my.sharepoint.com/personal/eldon_marks_v75inc_com/_layouts/15/stream.aspx?id=%2Fpersonal%2Feldon%5Fmarks%5Fv75inc%5Fcom%2FDocuments%2FRecordings%2FJaseci%20AI%20Mentorship%20Sessions%2D20230320%5F153331%2DMeeting%20Recording%2Emp4&ga=1)
