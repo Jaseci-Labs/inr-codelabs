@@ -4,36 +4,20 @@ Before you begin running any JAC program, always remember to install or update y
 
 `pip3 install jaseci-serv` or `pip3 install jaseci-serv --upgrade`
 
-# Codelab-7
+# Codelab-8.1
 
 ## Summary
 
-* In this codelab we will be integrating intent classification to present a more unified conversational means of interaction when performing semantic searches vs entity-based searches.
-* For this we will employ a pre-trained model to do our intent classification.
+* In this codelab we will be extending the common conversational UI we built last time to be state-driven so we can have more complex conversational interactions such as multi-turn dialogs with context.
+* For this we will will be building out the core of a multi-turn dialog subsystem.
 
 ## Recording
 
-Here's the recording for codelab-7: [Jaseci AI Mentorship Sessions-20230515_153428-Meeting Recording.mp4](https://v75corp-my.sharepoint.com/personal/eldon_marks_v75inc_com/_layouts/15/stream.aspx?id=%2Fpersonal%2Feldon%5Fmarks%5Fv75inc%5Fcom%2FDocuments%2FRecordings%2FJaseci%20AI%20Mentorship%20Sessions%2D20230515%5F153428%2DMeeting%20Recording%2Emp4&ga=1)
+Here's the recording for codelab-8.1: [Jaseci AI Mentorship Sessions-20230517_154228-Meeting Recording.mp4](https://v75corp-my.sharepoint.com/personal/eldon_marks_v75inc_com/_layouts/15/stream.aspx?id=%2Fpersonal%2Feldon%5Fmarks%5Fv75inc%5Fcom%2FDocuments%2FRecordings%2FJaseci%20AI%20Mentorship%20Sessions%2D20230517%5F154228%2DMeeting%20Recording%2Emp4&ga=1)
 
-
-## Create our training dataset for the intents
-
-![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-7/images/c7_intent_data.png?raw=true)
 
 ## Build and update
 
 `script scripts/rebuild`
 
-![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-7/images/c7_build_update.png?raw=true)
-
-## Execute interact walker
-
-based on training data it will route to correct walker
-
-`walker run interact -ctx "{\"utterance\": \"Show me news about Guyana\" }"`
-
-![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-7/images/c7_execute_interact_walker_1.png?raw=true)
-
-`walker run interact -ctx "{\"utterance\": \"show me news in politics and crime from Kaieteur news on May 14\" }"`
-
-![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-7/images/c7_execute_interact_walker_2.png?raw=true)
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-8.1/images/c8_build_update.png?raw=true)
