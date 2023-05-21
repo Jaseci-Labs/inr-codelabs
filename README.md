@@ -22,3 +22,11 @@ Let’s add the modules we’ll need to do the clustering
 
 `pip install jac_misc[cluster]`
 
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-6/images/c6_install_cluster_module.png?raw=true)
+
+
+## Build and update
+
+`script scripts/rebuild`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-6/images/c6_build_update.png?raw=true)
