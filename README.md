@@ -30,3 +30,32 @@ Let’s add the modules we’ll need to do the clustering
 `script scripts/rebuild`
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-6/images/c6_build_update.png?raw=true)
+
+
+## Execute relate_posts
+
+We can use the default hdbscan or specify kmeans
+
+__hdbscan__
+
+`walker run relate_posts`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-6/images/c6_relate_posts_default.png?raw=true)
+
+__kmeans__
+
+`walker run relate_posts -ctx "{\"cluster_method\":\"kmeans\", \"n_clusters\":5 }"`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-6/images/c6_relate_posts_kmeans.png?raw=true)
+
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-6/images/c6_relate_posts_result.png?raw=true)
+
+
+## Execute get_related_posts
+
+`walker run get_related_posts -nd "[post_jid]"`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-6/images/c6_get_related_posts_1.png?raw=true)
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-6/images/c6_get_related_posts_2.png?raw=true)
