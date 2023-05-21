@@ -583,3 +583,72 @@ walker get_related_posts {
         report -[related]-> node::post;
     }
 }
+
+
+
+walker classify_intent {
+    has utterance;
+    has anchor intent = "";
+    can use.text_classify;
+
+    try {
+        intent_data = file.load_json(global.intent_data);
+    } else {
+        std.log("Could not load intent data.");
+    }
+
+    if(intent_data) {
+        min_confidence = global.min_intent_confidence;
+
+        for item in intent_data {
+
+            statements = intent_data[item];
+
+            predicted_intent = use.text_classify(
+                text = utterance,
+                classes = statements.list
+            );
+
+            match_index = predicted_intent['match_idx'];
+            confidence = predicted_intent['scores'][match_index];
+            if (confidence >= min_confidence) {
+                min_confidence = confidence;
+                intent = item;
+            }
+        }
+    }
+
+    report intent;
+}
+
+
+walker interact {
+    has utterance;
+    has intent;
+
+    if(!utterance) {
+        report:status = 400;
+        report "Missing required parameter";
+        disengage;
+    }
+
+    intent = spawn here walker::classify_intent(utterance=utterance);
+
+    if(!intent) {
+        report "No intent found";
+        disengage;
+    }
+
+    std.log("Intent: "+ intent);
+
+    if(intent == "semantic_search") {
+        spawn here walker::semantic_search(query=query);
+    }
+    elif(intent == "entity_search") {
+        spawn here walker::entity_search(query=query);
+    }
+    else {
+        report intent;
+    }
+
+}

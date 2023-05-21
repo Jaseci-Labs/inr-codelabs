@@ -26,3 +26,14 @@ Here's the recording for codelab-7: [Jaseci AI Mentorship Sessions-20230515_1534
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-7/images/c7_build_update.png?raw=true)
 
+## Execute interact walker
+
+based on training data it will route to correct walker
+
+`walker run interact -ctx "{\"utterance\": \"Show me news about Guyana\" }"`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-7/images/c7_execute_interact_walker_1.png?raw=true)
+
+`walker run interact -ctx "{\"utterance\": \"show me news in politics and crime from Kaieteur news on May 14\" }"`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-7/images/c7_execute_interact_walker_2.png?raw=true)
