@@ -515,7 +515,7 @@ walker relate_posts {
             // creates a list of embeddings using posts summary
             umap_embeddings = spawn here walker::do_umap(list_of_text=list_of_summaries);
             
-            // generates hbd clusters based on umap embeddings
+            // generates hdbscan clusters based on umap embeddings
             if (cluster_method == "hdbscan") {
                 hdbscan_data = spawn here walker::get_hdbscan_clusters(umap_embeddings=umap_embeddings);
                 clusters = inr.zip_list(d_keys=posts_jid, d_values=hdbscan_data);
@@ -542,6 +542,8 @@ walker relate_posts {
     }
 
     post {
+        // remove any pre-existing post relationships
+        !-[related]-> node::post;
 
         std.log("examining posts related to: "+here.title);
 
