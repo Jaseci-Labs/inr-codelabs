@@ -53,3 +53,25 @@ We can execute any of the scripts like this:
 `script scripts/rebuild`
 
 ![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-5.2/images/c5_executing_scripts.png?raw=true)
+
+## Tidying up
+
+Let’s also tidy up now that we have a data folder.. We have moved __news_posts.json__ and __tag_data.json__ to the data folder.
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-5.2/images/c5_tidying_up.png?raw=true)
+
+
+## Build and update
+
+`script scripts/rebuild`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-5.2/images/c5_build_update.png?raw=true)
+
+
+## Execute entity_search
+
+`walker run entity_search -ctx "{\"utterance\": \"show me business and crime news from Kaieteur news on September 14 2020\" }"`
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-5.2/images/c5_execute_entity_search_1.png?raw=true)
+
+![alt text](https://github.com/Jaseci-Labs/inr-codelabs/blob/codelab-5.2/images/c5_execute_entity_search_2.png?raw=true)
