@@ -160,7 +160,7 @@ walker summarize_posts {
 
         // for each post that doesn't have a summary, generate a summary from the description and save it in summary attribute
         for n in post_nodes {
-            if(!n.summary): n.summary = t5_sum.classify_text(text = n.description, min_length = min_len, max_length = max_len);
+            n.summary = t5_sum.classify_text(text = n.description, min_length = min_len, max_length = max_len);
             std.log(n.summary);
             report n;
         }
@@ -172,7 +172,7 @@ walker summarize_posts {
 // for each post, identify which tags are applicable and establish edges between them
 walker tag_posts {
 
-    root: take --> node::app_root;
+    root: take -->[0];
     app_root: take --> node::posts;
 
     posts {
@@ -268,14 +268,15 @@ walker entity_search {
     can extract_entities {
         
         try {
-            entity_config = file.load_json(global.entity_config);
+            entity_config = file.load_json(global.entity_list);
         } else {
             std.log("Could not load entity list.");
         }
 
         if(entity_config) {
-            res = tfm_ner.extract_entity(visitor.utterance);
 
+            res = tfm_ner.extract_entity(utterance);
+            std.log(res);
             //prepare a standard way of organizing extracted entities inside of the walker
             //this can be modified if we swap out the NER without altering dependencies in the implementing app
             if(res.type == list || res.type == dict) {
@@ -308,8 +309,9 @@ walker entity_search {
 
     }
 
-    // extract entities then we filter posts and report...
+    // extract entities then we filter posts and report
     ::extract_entities;
+    std.log(entities);
     report spawn net.root() walker::filter_posts_by_entities(entities = entities);
 }
 
@@ -542,7 +544,7 @@ walker relate_posts {
     }
 
     post {
-        // remove any pre-existing post relationships
+        //remove any pre-existing post relationships 
         !-[related]-> node::post;
 
         std.log("examining posts related to: "+here.title);
@@ -584,26 +586,24 @@ walker get_related_posts {
     }
 }
 
-
-
 walker classify_intent {
     has utterance;
     has anchor intent = "";
     can use.text_classify;
-
+        
     try {
         intent_data = file.load_json(global.intent_data);
     } else {
         std.log("Could not load intent data.");
     }
-
+    
     if(intent_data) {
         min_confidence = global.min_intent_confidence;
-
+    
         for item in intent_data {
 
             statements = intent_data[item];
-
+    
             predicted_intent = use.text_classify(
                 text = utterance,
                 classes = statements.list
@@ -614,9 +614,9 @@ walker classify_intent {
             if (confidence >= min_confidence) {
                 min_confidence = confidence;
                 intent = item;
-            }
+            }                
         }
-    }
+    }     
 
     report intent;
 }
@@ -631,7 +631,7 @@ walker interact {
         report "Missing required parameter";
         disengage;
     }
-
+    
     intent = spawn here walker::classify_intent(utterance=utterance);
 
     if(!intent) {
@@ -639,13 +639,13 @@ walker interact {
         disengage;
     }
 
-    std.log("Intent: "+ intent);
+    std.log ("Intent: "+ intent);
 
     if(intent == "semantic_search") {
-        spawn here walker::semantic_search(query=query);
+        spawn here walker::semantic_search(query=utterance);
     }
     elif(intent == "entity_search") {
-        spawn here walker::entity_search(query=query);
+        spawn here walker::entity_search(query=utterance);
     }
     else {
         report intent;

@@ -36,7 +36,7 @@ walker create_tag {
 
 
 // updates a created tag; 
-// node jid must be specified in nd param
+// nd must be specified along with optional params in the ctx param
 walker update_tag {
 
     has label;

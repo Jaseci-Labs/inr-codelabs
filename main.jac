@@ -7,6 +7,8 @@ import {*} with "./tags/tags_walkers.jac";
 import {*} with 'ai/tfm_ner/tfm_ner_graph.jac';
 import {*} with 'ai/tfm_ner/tfm_ner_walkers.jac';
 
+import {*} with "./dialog/dialog_walkers.jac";
+
 walker init {
 
     root {

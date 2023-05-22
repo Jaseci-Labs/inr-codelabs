@@ -1,9 +1,13 @@
-from jaseci.jsorc.live_actions import jaseci_action
 import re
 import dateparser
 from datetime import date
 from dateutil.relativedelta import relativedelta
-
+import importlib.util
+if importlib.util.find_spec("jaseci_action", package = "jaseci.jsorc.live_actions"):
+    from jaseci.jsorc.live_actions import jaseci_action
+else:
+    from jaseci.actions.live_actions import jaseci_action
+    
 @jaseci_action(act_group=["inr"], allow_remote=True)
 def remove_html_tags(text: str):
 

@@ -2,7 +2,7 @@ walker talker {
 
     has session_id;
     has utterance;
-    has anchor response = "";
+    has response = "";
     has last_response = "";
     has intent;
     has entities = {};
@@ -28,6 +28,7 @@ walker talker {
         response = "";
         intent = null;
         sentiment = "";
+        entities = {};
         entity_data = {};
         resumed = false;
     }   
@@ -43,12 +44,11 @@ walker talker {
         here::resume; //resume from previous walk
         
         if(response) {
-            // std.out(_context["probe_entity"]);
-            if("probe_entity" not in _context): _context["probe_entity"]='';
 
             if(verbose) {
                 payload = {
                     "session_id": session_id,
+                    "name": here.name,
                     "utterance": utterance,
                     "intent": intent,
                     "sentiment": sentiment,
@@ -56,18 +56,15 @@ walker talker {
                     "context": _context,
                     "next_state": next_state,
                     "prev_state": prev_state,
+                    "preferences": preferences,
                     "debug": _debug,
-                    "response": response,
-                    "memory_id": memory_id,
-                    "probe_entity": _context['probe_entity']
+                    "response": response
                 };
             } else {
                 payload = {
                     "session_id": session_id,
                     "utterance": utterance,
-                    "response": response,
-                    "memory_id": memory_id,
-                    "probe_entity": _context['probe_entity']
+                    "response": response
                 };
             }
             
@@ -151,36 +148,5 @@ walker clear_user_session {
     session {
         destroy here;
         disengage;
-    }
-}
-
-//very dangerous..only for development
-walker wipe_sessions {
-    root: take --> node::app_root;
-    app_root: take --> node::sessions;
-
-    sessions {
-        take --> node::session;
-    }
-
-    session {
-        destroy here;
-    }
-}
-
-
-
-walker collect_info{
-    has anchor _context;
-    has lis =[];
-    root: take -->[0];
-    app_root: take --> node::sessions;
-    sessions{
-        _context = -->.session_data;
-        
-        for i in _context{
-            lis.list::append(i['_debug']['transcript']);
-        }
-        report lis;
     }
 }

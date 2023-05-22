@@ -25,7 +25,7 @@ walker tfm_ner_load_model {
     //loads a trained model from file
     has model_path = global.tfm_ner_model_output_path;
     can tfm_ner.load_model;
-    tfm_ner.load_model(model_path=model_path);
+    std.log(tfm_ner.load_model(model_path=model_path));
 }
 
 walker tfm_ner_infer {

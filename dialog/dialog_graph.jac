@@ -3,7 +3,6 @@ node dialog_state {
     can use.text_classify;
     can tfm_ner.extract_entity;
     can sentiment.predict;
-    can utils.replace_word;
 
     has name;
 
@@ -90,44 +89,31 @@ node dialog_state {
         if(entity_config) {
             res = tfm_ner.extract_entity(visitor.utterance);
             visitor._debug.dict::update({"extracted_entities" : res});
-            std.out(res);
 
             //prepare a standard way of organizing extracted entities inside of the walker
             //this can be modified if we swap out the NER without altering dependencies in the implementing app
             if(res.type == list || res.type == dict) {
                 for entity in res {
-                    if(entity["conf_score"] >= global.min_ner_confidence and entity['entity_text'] not in entity_config["ignore"]) {
-                        lis = ['u','i','U','I'];
-                        // if(entity['entity_text'] in lis or entity['entity_text'].list.length > 1){
-
-                            entity_label = entity["entity_value"];
-                            entity_text = entity["entity_text"];
-                            entity_confidence = entity["conf_score"];
-
-                            //perform entity text replacements
-                            if(entity_text in (entity_config["replace"]).dict::keys): entity_text = entity_config["replace"][entity_text];
-                            if("convert" in entity_config) {
-                                for text in (entity_config["convert"]).dict::keys {
-                                    entity_text = utils.replace_word(entity_text, text, entity_config["convert"][text]);
-                                }
+                    if(entity["conf_score"] >= global.min_ner_confidence) {
+                        entity_label = entity["entity_value"];
+                        entity_text = entity["entity_text"];
+                        entity_confidence = entity["conf_score"];
+                                                
+                        if(entity_label in entity_config["labels"]) { 
+                            //only consider valid entities based on entity_config.json
+                            //update the collection of entities in the walker, 
+                            //appending new entity_texts to existing entity_labels
+                            if(entity_label not in visitor.entity_data) {
+                                visitor.entities[entity_label] = [entity_text];
+                                visitor.entity_data[entity_label] = [{"text": entity_text, "confidence":entity_confidence}];
+                            } else {
+                                //we already have items under the label, ensure we only add unique items..
+                                if(entity_text not in visitor.entities[entity_label]) {
+                                    visitor.entities[entity_label] += [entity_text]; 
+                                    visitor.entity_data[entity_label] += [{"text":entity_text, "confidence":entity_confidence}]; 
+                                }                                
                             }
-                                                    
-                            if(entity_label in entity_config["labels"]) { 
-                                //only consider valid entities based on entity_config.json
-                                //update the collection of entities in the walker, 
-                                //appending new entity_texts to existing entity_labels
-                                if(entity_label not in visitor.entity_data) {
-                                    visitor.entities[entity_label] = [entity_text];
-                                    visitor.entity_data[entity_label] = [{"text": entity_text, "confidence":entity_confidence}];
-                                } else {
-                                    //we already have items under the label, ensure we only add unique items..
-                                    if(entity_text not in visitor.entities[entity_label]) {
-                                        visitor.entities[entity_label] += [entity_text]; 
-                                        visitor.entity_data[entity_label] += [{"text":entity_text, "confidence":entity_confidence}]; 
-                                    }                                
-                                }
-                            }
-                        // }
+                        }
                     }
                 }
             }
@@ -187,6 +173,17 @@ node dialog_state {
 
 }
 
+edge intent_transition {
+    has intent;
+}
+
+node sessions;
+
+node session {
+    has session_id;
+    has session_data = {};
+}
+
 node dialog_root:dialog_state {
     has name = "dialog_root";
 
@@ -207,6 +204,11 @@ node dialog_root:dialog_state {
     }
 }
 
+node dialog_end:dialog_state {
+    has name = "dialog_end";
+    //the talker walker disengages when it gets here
+}
+
 node greet:dialog_state {
     has name = "greet";
 
@@ -217,20 +219,4 @@ node greet:dialog_state {
     can nlg {
         ::set_state_response;
     }
-}
-
-node dialog_end:dialog_state {
-    has name = "dialog_end";
-    //the talker walker disengages when it gets here
-}
-
-edge intent_transition {
-    has intent;
-}
-
-node sessions;
-
-node session {
-    has session_id;
-    has session_data = {};
 }
