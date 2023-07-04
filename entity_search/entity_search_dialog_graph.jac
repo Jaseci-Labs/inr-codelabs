@@ -1,5 +1,5 @@
-node semantic_search_state:dialog_state {
-    has name = "semantic_search";
+node entity_search_state:dialog_state {
+    has name = "entity_search";
 
     can process {
         # nothing to process here, be sure to send the walker back to the dialog root when complete
@@ -8,7 +8,7 @@ node semantic_search_state:dialog_state {
 
     can nlg {
         # we call our original semantic_search walker and pass to it the utterance that comes in from the talker walker
-        results = spawn net.root() walker::semantic_search(query=visitor.utterance);
+        results = spawn net.root() walker::entity_search(query=visitor.utterance, entities = visitor.entities);
         # we'll return the resultset if we have one, otherwise, we tell the user we've got nothing...
         if(results): visitor.response = results;
         else: visitor.response = "There are no results for: '" + visitor.utterance +"'";

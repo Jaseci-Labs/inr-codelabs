@@ -16,7 +16,7 @@ walker tfm_ner_train_model {
 }
 
 walker tfm_ner_save_model {
-    has model_path;
+    has model_path = global.tfm_ner_model_output_path;
     can tfm_ner.save_model;
     tfm_ner.save_model(model_path=model_path);
 }

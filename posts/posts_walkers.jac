@@ -262,56 +262,9 @@ walker semantic_search {
 
 // extract entities from query inputted by user
 walker entity_search {
-    has utterance;
+    has query;
     has entities = {};
 
-    can extract_entities {
-        
-        try {
-            entity_config = file.load_json(global.entity_list);
-        } else {
-            std.log("Could not load entity list.");
-        }
-
-        if(entity_config) {
-
-            res = tfm_ner.extract_entity(utterance);
-            std.log(res);
-            //prepare a standard way of organizing extracted entities inside of the walker
-            //this can be modified if we swap out the NER without altering dependencies in the implementing app
-            if(res.type == list || res.type == dict) {
-                for entity in res {
-                    if(entity["conf_score"] >= global.min_ner_confidence) {
-                        entity_label = entity["entity_value"];
-                        entity_text = entity["entity_text"];
-                        entity_confidence = entity["conf_score"];
-                                                
-                        if(entity_label in entity_config["labels"]) { 
-                            //only consider valid entities based on entity_config.json
-                            //update the collection of entities in the walker, 
-                            //appending new entity_texts to existing entity_labels
-                            if(entity_label not in entities) {
-                                entities[entity_label] = [{"text": entity_text, "confidence":entity_confidence}];
-                            } else {
-                                texts = entities[entity_label];
-
-                                for item in texts {   
-                                    if(entity_text not in item["text"]) {
-                                        entities[entity_label] += [{"text":entity_text, "confidence":entity_confidence}]; 
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }      
-
-    }
-
-    // extract entities then we filter posts and report
-    ::extract_entities;
-    std.log(entities);
     report spawn net.root() walker::filter_posts_by_entities(entities = entities);
 }
 
@@ -333,17 +286,17 @@ walker filter_posts_by_entities {
         tags {  // while on tags node...
             tag_labels = -->.label;
             for extracted_tag in entities["tag"] {
-                std.log("extracted tag: "+extracted_tag["text"]);
+                std.log("extracted tag: "+extracted_tag);
                 // if extracted tag matches the label of any tag then go to that tag node
-                if (extracted_tag["text"] in tag_labels){
-                    take --> node::tag(label == extracted_tag["text"]);
+                if (extracted_tag in tag_labels){
+                    take --> node::tag(label == extracted_tag);
                 }
                 // else spawan walker to get a similar tag
                 else {
-                    std.log("looking for a similar tag related to: "+extracted_tag["text"]);
-                    similar_tag = spawn here walker::get_similar_tag(extracted_tag=extracted_tag["text"], entities=entities);
+                    std.log("looking for a similar tag related to: "+extracted_tag);
+                    similar_tag = spawn here walker::get_similar_tag(extracted_tag=extracted_tag, entities=entities);
                     if(similar_tag) {
-                        std.log("found similar tag: "+ similar_tag +" to:"+ extracted_tag["text"]);
+                        std.log("found similar tag: "+ similar_tag +" to:"+ extracted_tag);
                         take --> node::tag(label == similar_tag);
                     }
                 }
